@@ -92,6 +92,18 @@ class Document {
     }
 
     /**
+     * set document to active
+     * 设置文档为活跃状态
+     */
+    public active() {
+        var documentDescriptor = new ActionDescriptor();
+        var documentReference = new ActionReference();
+        documentReference.putIdentifier(charIDToTypeID("Dcmn"), this.id);
+        documentDescriptor.putReference(charIDToTypeID("null"), documentReference);
+        executeAction(charIDToTypeID("slct"), documentDescriptor, DialogModes.NO);
+    }
+
+    /**
      * trim current document transparent area
      * 裁剪当前文档的透明区域
      */
@@ -265,7 +277,7 @@ class Document {
      * 设定选中某些图层
      * @param layers
      */
-    public setSelectedLayers(layers:Layer[]):void {
+    public selectLayers(layers:Layer[]):void {
         if(layers.length == 0) return;
         var current = new ActionReference();
         for(var i = 0; i < layers.length;i++) {
@@ -275,6 +287,20 @@ class Document {
         var desc  = new ActionDescriptor();
         desc.putReference (charIDToTypeID("null"), current);
         executeAction( charIDToTypeID( "slct" ), desc , DialogModes.NO );
+    }
+
+    /**
+     * select a layer by its name
+     * 根据图层名称选中图层
+     * @param name
+     */
+    public selectLayerByName(name:string):void {
+        var desc8 = new ActionDescriptor();
+        var ref5 = new ActionReference();
+        ref5.putName( charIDToTypeID( "Lyr " ), name );
+        desc8.putReference( charIDToTypeID( "null" ), ref5 );
+        desc8.putBoolean( charIDToTypeID( "MkVs" ), false );
+        executeAction( charIDToTypeID( "slct" ), desc8, DialogModes.NO );
     }
 
     /**
@@ -365,6 +391,21 @@ class Document {
     }
 
     /**
+     * get the top layer
+     * 选中最上面的图层
+     * @returns {Layer}
+     */
+    public getFrontLayer():Layer {
+        var layerDescriptor = new ActionDescriptor();
+        var layerReference = new ActionReference();
+        layerReference.putEnumerated(charIDToTypeID("Lyr "), charIDToTypeID("Ordn"), charIDToTypeID("Frnt"));
+        layerDescriptor.putReference( charIDToTypeID( "null" ), layerReference );
+        layerDescriptor.putBoolean( charIDToTypeID( "MkVs" ), false );
+        executeAction( charIDToTypeID( "slct" ), layerDescriptor, DialogModes.NO );
+        return this.getSelectedLayers()[0];
+    }
+
+    /**
      * get json format info of current document
      * 获取当前文档的JSON数据结构
      * @param notes
@@ -380,6 +421,11 @@ class Document {
             ad.putBoolean(stringIDToTypeID("getNotes"), true)
         }
         return executeAction(charIDToTypeID("getd"), ad, DialogModes.NO).getString(stringIDToTypeID("json"))
+    }
+
+    // TODO
+    public addLayer():void {
+
     }
 
 
@@ -409,60 +455,17 @@ class Document {
     /**
      * get current selection, may be zero
      * 获取当前的选区,可能是0
-     * @returns {Rect}
+     * @returns {Selection}
      */
-    public getSelection():Rect {
+    public getSelection():Selection {
         try {
-            var selection = activeDocument.selection.bounds;
-            return new Rect(selection[0].value, selection[1].value, selection[2].value - selection[0].value, selection[3].value - selection[1].value);
+            let selection = activeDocument.selection.bounds;
+            let rect = new Rect(selection[0].value, selection[1].value, selection[2].value - selection[0].value, selection[3].value - selection[1].value);
+            let sel = new Selection(rect);
+            return sel;
         } catch (ex) {
-            return new Rect(0, 0, 0, 0);
+            return null;
         }
-    }
-
-    /**
-     * select a selection with bounds
-     * 根据给定的尺寸生成一个选区
-     * @param bounds
-     * @returns {Rect}
-     */
-    public setSelection(bounds:Rect):Rect {
-        var size = this.getSize();
-        var documentBounds = new Rect(0, 0, size.width, size.height);
-        var bounds = documentBounds.intersect(bounds);
-        if(bounds == null) return null;
-
-        var selectionMode = /*isAppend ? charIDToTypeID("AddT") : */charIDToTypeID("setd");
-        var selectionDescriptor = new ActionDescriptor();
-        var selectionReference = new ActionReference();
-        selectionReference.putProperty(charIDToTypeID("Chnl"), charIDToTypeID("fsel"));
-        selectionDescriptor.putReference(charIDToTypeID("null"), selectionReference);
-        selectionDescriptor.putObject(charIDToTypeID("T   "), charIDToTypeID("Rctn"), bounds.toDescriptor());
-        executeAction(selectionMode, selectionDescriptor, DialogModes.NO);
-
-        return bounds;
-    }
-
-    /**
-     * delsect selection
-     * 取消选区
-     */
-    public deselectSelection():void {
-        var selectionDescriptor = new ActionDescriptor();
-        var selectionReference = new ActionReference();
-        selectionReference.putProperty(charIDToTypeID("Chnl"), charIDToTypeID("fsel"));
-        selectionDescriptor.putReference(charIDToTypeID("null"), selectionReference);
-        selectionDescriptor.putEnumerated(charIDToTypeID("T   "), charIDToTypeID("Ordn"), charIDToTypeID("None"));
-        executeAction(charIDToTypeID("setd"), selectionDescriptor, DialogModes.NO);
-    }
-
-    /**
-     * invert selection
-     * 反转当前选区
-     */
-    public invertSelection() {
-        var idInvs = charIDToTypeID( "Invs" );
-        executeAction( idInvs, undefined, DialogModes.NO );
     }
 
     /**

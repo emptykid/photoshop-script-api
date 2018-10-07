@@ -27,6 +27,7 @@ gulp.task('copySrc', function () {
         'src/Point.js',
         'src/Rect.js',
         'src/Rectangle.js',
+        'src/Selection.js',
         'src/Size.js'])
         .pipe(concat('photoshop_script_api.js'))
         .pipe(gulp.dest(output_dir));

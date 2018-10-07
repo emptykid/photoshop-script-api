@@ -28,6 +28,16 @@ class Color {
         else return (this.Hex() + " / " + this.RGB());
     }
 
+    public toSolidColor():any {
+        let rgb = new RGBColor();
+        rgb.blue = this.B;
+        rgb.green = this.G;
+        rgb.red = this.R;
+        let s = new SolidColor();
+        s.rgb = rgb;
+        return s;
+    }
+
     public componentToHex(c:number):string {
         c = Math.round(c);
         var hex = c.toString(16);

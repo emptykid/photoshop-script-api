@@ -11,6 +11,7 @@ declare class ArtLayer {
     textItem:any;
 }
 
+
 declare class Selections {
     bounds: UnitValue[];
 }

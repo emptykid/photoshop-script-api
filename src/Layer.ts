@@ -78,6 +78,56 @@ class Layer {
         }
     }
 
+
+    /**
+     * get size
+     * 获取图层的尺寸
+     * @returns {Size}
+     */
+    public getSize():Size {
+        return this.getBounds().size();
+    }
+
+    /**
+     * hide layer
+     * 隐藏图层
+     */
+    public hide():void {
+        var current = new ActionReference();
+        current.putIdentifier(charIDToTypeID("Lyr "), this.id);;
+        var desc242 = new ActionDescriptor();
+        var list10 = new ActionList();
+        list10.putReference( current );
+        desc242.putList( charIDToTypeID( "null" ), list10 );
+        executeAction( charIDToTypeID( "Hd  " ), desc242, DialogModes.NO );
+    }
+
+    /**
+     * show the layer
+     * 显示图层
+     */
+    public show():void {
+        var desc403 = new ActionDescriptor();
+        var list78 = new ActionList();
+        var ref142 = new ActionReference();
+        ref142.putIdentifier(charIDToTypeID("Lyr "), this.id);;
+        list78.putReference( ref142 );
+        desc403.putList( charIDToTypeID( "null" ), list78 );
+        executeAction( charIDToTypeID( "Shw " ), desc403, DialogModes.NO );
+    }
+
+    /**
+     * set selected the layer
+     * 设置此图层为选中状态
+     */
+    public select():void {
+        var current = new ActionReference();
+        current.putIdentifier(charIDToTypeID("Lyr "), this.id);
+        var desc  = new ActionDescriptor();
+        desc.putReference (charIDToTypeID("null"), current);
+        executeAction( charIDToTypeID( "slct" ), desc , DialogModes.NO );
+    }
+
     /**
      * is layer visible
      * 图册是否可见
@@ -112,5 +162,31 @@ class Layer {
             return false;
         }
     }
+
+    /**
+     * create a selection with current layer
+     * 从当前图层创建选区
+     * @returns {Selection}
+     */
+    public toSelection():Selection {
+        var desc3 = new ActionDescriptor();
+        var ref1 = new ActionReference();
+        ref1.putProperty( charIDToTypeID( "Chnl" ), charIDToTypeID( "fsel" ));
+        desc3.putReference( charIDToTypeID( "null" ), ref1 );
+        var ref2 = new ActionReference();
+        ref2.putEnumerated( charIDToTypeID( "Path" ), charIDToTypeID( "Path" ), stringIDToTypeID( "vectorMask" ));
+        ref2.putIdentifier(charIDToTypeID("Lyr "), this.id);
+        desc3.putReference( charIDToTypeID( "T   " ), ref2 );
+        desc3.putInteger( charIDToTypeID( "Vrsn" ), 1 );
+        desc3.putBoolean( stringIDToTypeID( "vectorMaskParams" ), true );
+        executeAction( charIDToTypeID( "setd" ), desc3, DialogModes.NO );
+
+        let selection = activeDocument.selection.bounds;
+        let rect = new Rect(selection[0].value, selection[1].value, selection[2].value - selection[0].value, selection[3].value - selection[1].value);
+        let sel = new Selection(rect);
+        sel.create();
+        return sel;
+    }
+
 
 }

@@ -78,6 +78,15 @@ var Color = (function () {
         else
             return (this.Hex() + " / " + this.RGB());
     };
+    Color.prototype.toSolidColor = function () {
+        var rgb = new RGBColor();
+        rgb.blue = this.B;
+        rgb.green = this.G;
+        rgb.red = this.R;
+        var s = new SolidColor();
+        s.rgb = rgb;
+        return s;
+    };
     Color.prototype.componentToHex = function (c) {
         c = Math.round(c);
         var hex = c.toString(16);
@@ -353,7 +362,7 @@ var Document = (function () {
      * 设定选中某些图层
      * @param layers
      */
-    Document.prototype.setSelectedLayers = function (layers) {
+    Document.prototype.selectLayers = function (layers) {
         if (layers.length == 0)
             return;
         var current = new ActionReference();
@@ -364,6 +373,25 @@ var Document = (function () {
         desc.putReference(charIDToTypeID("null"), current);
         executeAction(charIDToTypeID("slct"), desc, DialogModes.NO);
     };
+    /**
+     * select a layer by its name
+     * 根据图层名称选中图层
+     * @param name
+     */
+    Document.prototype.selectLayerByName = function (name) {
+        var desc8 = new ActionDescriptor();
+        var ref5 = new ActionReference();
+        ref5.putName(charIDToTypeID("Lyr "), name);
+        desc8.putReference(charIDToTypeID("null"), ref5);
+        desc8.putBoolean(charIDToTypeID("MkVs"), false);
+        executeAction(charIDToTypeID("slct"), desc8, DialogModes.NO);
+    };
+    /**
+     * get some layer by there names
+     * 根据图层的名称获取图层列表
+     * @param name
+     * @returns {Array}
+     */
     Document.prototype.getLayersByName = function (name) {
         var info = this.getJSONInfo(false);
         var obj = JSON.parse(info);
@@ -386,6 +414,74 @@ var Document = (function () {
         return walkLayers(layers, name);
     };
     /**
+     * get layer by layer id
+     * 根据图层ID获取图层
+     * @param theID
+     * @returns {Layer|null}
+     */
+    Document.prototype.getLayerByID = function (theID) {
+        var info = this.getJSONInfo(false);
+        var obj = JSON.parse(info);
+        var layers = obj['layers'];
+        function walkLayers(layers, target) {
+            var ret = null;
+            for (var i = 0; i < layers.length; i++) {
+                var layer = layers[i];
+                if (layer['id'] == target) {
+                    return new Layer(layer['id']);
+                }
+                else {
+                    if (layer['layers']) {
+                        return walkLayers(layer['layers'], target);
+                    }
+                }
+            }
+            return ret;
+        }
+        return walkLayers(layers, theID);
+    };
+    /**
+     * get layer by index
+     * 根据图层的顺序获取图层
+     * @param index
+     * @returns {Layer|null}
+     */
+    Document.prototype.getLayerByIndex = function (index) {
+        var info = this.getJSONInfo(false);
+        var obj = JSON.parse(info);
+        var layers = obj['layers'];
+        function walkLayers(layers, target) {
+            var ret = null;
+            for (var i = 0; i < layers.length; i++) {
+                var layer = layers[i];
+                if (layer['index'] == target) {
+                    return new Layer(layer['id']);
+                }
+                else {
+                    if (layer['layers']) {
+                        return walkLayers(layer['layers'], target);
+                    }
+                }
+            }
+            return ret;
+        }
+        return walkLayers(layers, index);
+    };
+    /**
+     * get the top layer
+     * 选中最上面的图层
+     * @returns {Layer}
+     */
+    Document.prototype.getFrontLayer = function () {
+        var layerDescriptor = new ActionDescriptor();
+        var layerReference = new ActionReference();
+        layerReference.putEnumerated(charIDToTypeID("Lyr "), charIDToTypeID("Ordn"), charIDToTypeID("Frnt"));
+        layerDescriptor.putReference(charIDToTypeID("null"), layerReference);
+        layerDescriptor.putBoolean(charIDToTypeID("MkVs"), false);
+        executeAction(charIDToTypeID("slct"), layerDescriptor, DialogModes.NO);
+        return this.getSelectedLayers()[0];
+    };
+    /**
      * get json format info of current document
      * 获取当前文档的JSON数据结构
      * @param notes
@@ -402,6 +498,9 @@ var Document = (function () {
             ad.putBoolean(stringIDToTypeID("getNotes"), true);
         }
         return executeAction(charIDToTypeID("getd"), ad, DialogModes.NO).getString(stringIDToTypeID("json"));
+    };
+    // TODO
+    Document.prototype.addLayer = function () {
     };
     /**
      * check if background layer exists
@@ -427,57 +526,18 @@ var Document = (function () {
     /**
      * get current selection, may be zero
      * 获取当前的选区,可能是0
-     * @returns {Rect}
+     * @returns {Selection}
      */
     Document.prototype.getSelection = function () {
         try {
-            var selection = activeDocument.selection.bounds;
-            return new Rect(selection[0].value, selection[1].value, selection[2].value - selection[0].value, selection[3].value - selection[1].value);
+            var selection_1 = activeDocument.selection.bounds;
+            var rect = new Rect(selection_1[0].value, selection_1[1].value, selection_1[2].value - selection_1[0].value, selection_1[3].value - selection_1[1].value);
+            var sel = new Selection(rect);
+            return sel;
         }
         catch (ex) {
-            return new Rect(0, 0, 0, 0);
-        }
-    };
-    /**
-     * select a selection with bounds
-     * 根据给定的尺寸生成一个选区
-     * @param bounds
-     * @returns {Rect}
-     */
-    Document.prototype.setSelection = function (bounds) {
-        var size = this.getSize();
-        var documentBounds = new Rect(0, 0, size.width, size.height);
-        var bounds = documentBounds.intersect(bounds);
-        if (bounds == null)
             return null;
-        var selectionMode = charIDToTypeID("setd");
-        var selectionDescriptor = new ActionDescriptor();
-        var selectionReference = new ActionReference();
-        selectionReference.putProperty(charIDToTypeID("Chnl"), charIDToTypeID("fsel"));
-        selectionDescriptor.putReference(charIDToTypeID("null"), selectionReference);
-        selectionDescriptor.putObject(charIDToTypeID("T   "), charIDToTypeID("Rctn"), bounds.toDescriptor());
-        executeAction(selectionMode, selectionDescriptor, DialogModes.NO);
-        return bounds;
-    };
-    /**
-     * delsect selection
-     * 取消选区
-     */
-    Document.prototype.deselectSelection = function () {
-        var selectionDescriptor = new ActionDescriptor();
-        var selectionReference = new ActionReference();
-        selectionReference.putProperty(charIDToTypeID("Chnl"), charIDToTypeID("fsel"));
-        selectionDescriptor.putReference(charIDToTypeID("null"), selectionReference);
-        selectionDescriptor.putEnumerated(charIDToTypeID("T   "), charIDToTypeID("Ordn"), charIDToTypeID("None"));
-        executeAction(charIDToTypeID("setd"), selectionDescriptor, DialogModes.NO);
-    };
-    /**
-     * invert selection
-     * 反转当前选区
-     */
-    Document.prototype.invertSelection = function () {
-        var idInvs = charIDToTypeID("Invs");
-        executeAction(idInvs, undefined, DialogModes.NO);
+        }
     };
     /**
      * get current open document ID
@@ -1136,6 +1196,53 @@ var Layer = (function () {
         }
     };
     /**
+     * get size
+     * 获取图层的尺寸
+     * @returns {Size}
+     */
+    Layer.prototype.getSize = function () {
+        return this.getBounds().size();
+    };
+    /**
+     * hide layer
+     * 隐藏图层
+     */
+    Layer.prototype.hide = function () {
+        var current = new ActionReference();
+        current.putIdentifier(charIDToTypeID("Lyr "), this.id);
+        ;
+        var desc242 = new ActionDescriptor();
+        var list10 = new ActionList();
+        list10.putReference(current);
+        desc242.putList(charIDToTypeID("null"), list10);
+        executeAction(charIDToTypeID("Hd  "), desc242, DialogModes.NO);
+    };
+    /**
+     * show the layer
+     * 显示图层
+     */
+    Layer.prototype.show = function () {
+        var desc403 = new ActionDescriptor();
+        var list78 = new ActionList();
+        var ref142 = new ActionReference();
+        ref142.putIdentifier(charIDToTypeID("Lyr "), this.id);
+        ;
+        list78.putReference(ref142);
+        desc403.putList(charIDToTypeID("null"), list78);
+        executeAction(charIDToTypeID("Shw "), desc403, DialogModes.NO);
+    };
+    /**
+     * set selected the layer
+     * 设置此图层为选中状态
+     */
+    Layer.prototype.select = function () {
+        var current = new ActionReference();
+        current.putIdentifier(charIDToTypeID("Lyr "), this.id);
+        var desc = new ActionDescriptor();
+        desc.putReference(charIDToTypeID("null"), current);
+        executeAction(charIDToTypeID("slct"), desc, DialogModes.NO);
+    };
+    /**
      * is layer visible
      * 图册是否可见
      * @returns {boolean}
@@ -1169,6 +1276,29 @@ var Layer = (function () {
         catch (e) {
             return false;
         }
+    };
+    /**
+     * create a selection with current layer
+     * 从当前图层创建选区
+     * @returns {Selection}
+     */
+    Layer.prototype.toSelection = function () {
+        var desc3 = new ActionDescriptor();
+        var ref1 = new ActionReference();
+        ref1.putProperty(charIDToTypeID("Chnl"), charIDToTypeID("fsel"));
+        desc3.putReference(charIDToTypeID("null"), ref1);
+        var ref2 = new ActionReference();
+        ref2.putEnumerated(charIDToTypeID("Path"), charIDToTypeID("Path"), stringIDToTypeID("vectorMask"));
+        ref2.putIdentifier(charIDToTypeID("Lyr "), this.id);
+        desc3.putReference(charIDToTypeID("T   "), ref2);
+        desc3.putInteger(charIDToTypeID("Vrsn"), 1);
+        desc3.putBoolean(stringIDToTypeID("vectorMaskParams"), true);
+        executeAction(charIDToTypeID("setd"), desc3, DialogModes.NO);
+        var selection = activeDocument.selection.bounds;
+        var rect = new Rect(selection[0].value, selection[1].value, selection[2].value - selection[0].value, selection[3].value - selection[1].value);
+        var sel = new Selection(rect);
+        sel.create();
+        return sel;
     };
     return Layer;
 }());
@@ -1339,6 +1469,57 @@ var Ellipse = (function () {
     return Ellipse;
 }());
 //# sourceMappingURL=Rectangle.js.map
+/**
+ * Created by xiaoqiang on 2018/10/7.
+ */
+var Selection = (function () {
+    function Selection(bounds) {
+        this.bounds = bounds;
+    }
+    /**
+     * create a selection with bounds
+     * 创建一个选区
+     */
+    Selection.prototype.create = function () {
+        var selectionMode = charIDToTypeID("setd");
+        var selectionDescriptor = new ActionDescriptor();
+        var selectionReference = new ActionReference();
+        selectionReference.putProperty(charIDToTypeID("Chnl"), charIDToTypeID("fsel"));
+        selectionDescriptor.putReference(charIDToTypeID("null"), selectionReference);
+        selectionDescriptor.putObject(charIDToTypeID("T   "), charIDToTypeID("Rctn"), this.bounds.toDescriptor());
+        executeAction(selectionMode, selectionDescriptor, DialogModes.NO);
+    };
+    /**
+     * de select current selection
+     * 取消选择当前选区
+     */
+    Selection.prototype.deselect = function () {
+        var selectionDescriptor = new ActionDescriptor();
+        var selectionReference = new ActionReference();
+        selectionReference.putProperty(charIDToTypeID("Chnl"), charIDToTypeID("fsel"));
+        selectionDescriptor.putReference(charIDToTypeID("null"), selectionReference);
+        selectionDescriptor.putEnumerated(charIDToTypeID("T   "), charIDToTypeID("Ordn"), charIDToTypeID("None"));
+        executeAction(charIDToTypeID("setd"), selectionDescriptor, DialogModes.NO);
+    };
+    /**
+     * invert current selection
+     * 反转当前选区
+     */
+    Selection.prototype.invert = function () {
+        var idInvs = charIDToTypeID("Invs");
+        executeAction(idInvs, undefined, DialogModes.NO);
+    };
+    /**
+     * fill current selection with color
+     * 用颜色填充当前选区
+     * @param color
+     */
+    Selection.prototype.fill = function (color) {
+        activeDocument.selection.fill(color.toSolidColor());
+    };
+    return Selection;
+}());
+//# sourceMappingURL=Selection.js.map
 /**
  * Created by xiaoqiang on 2018/10/6.
  */

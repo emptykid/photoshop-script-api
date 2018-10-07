@@ -81,6 +81,17 @@ var Document = (function () {
         return new Document();
     };
     /**
+     * set document to active
+     * 设置文档为活跃状态
+     */
+    Document.prototype.active = function () {
+        var documentDescriptor = new ActionDescriptor();
+        var documentReference = new ActionReference();
+        documentReference.putIdentifier(charIDToTypeID("Dcmn"), this.id);
+        documentDescriptor.putReference(charIDToTypeID("null"), documentReference);
+        executeAction(charIDToTypeID("slct"), documentDescriptor, DialogModes.NO);
+    };
+    /**
      * trim current document transparent area
      * 裁剪当前文档的透明区域
      */
@@ -246,7 +257,7 @@ var Document = (function () {
      * 设定选中某些图层
      * @param layers
      */
-    Document.prototype.setSelectedLayers = function (layers) {
+    Document.prototype.selectLayers = function (layers) {
         if (layers.length == 0)
             return;
         var current = new ActionReference();
@@ -256,6 +267,19 @@ var Document = (function () {
         var desc = new ActionDescriptor();
         desc.putReference(charIDToTypeID("null"), current);
         executeAction(charIDToTypeID("slct"), desc, DialogModes.NO);
+    };
+    /**
+     * select a layer by its name
+     * 根据图层名称选中图层
+     * @param name
+     */
+    Document.prototype.selectLayerByName = function (name) {
+        var desc8 = new ActionDescriptor();
+        var ref5 = new ActionReference();
+        ref5.putName(charIDToTypeID("Lyr "), name);
+        desc8.putReference(charIDToTypeID("null"), ref5);
+        desc8.putBoolean(charIDToTypeID("MkVs"), false);
+        executeAction(charIDToTypeID("slct"), desc8, DialogModes.NO);
     };
     /**
      * get some layer by there names
@@ -339,6 +363,20 @@ var Document = (function () {
         return walkLayers(layers, index);
     };
     /**
+     * get the top layer
+     * 选中最上面的图层
+     * @returns {Layer}
+     */
+    Document.prototype.getFrontLayer = function () {
+        var layerDescriptor = new ActionDescriptor();
+        var layerReference = new ActionReference();
+        layerReference.putEnumerated(charIDToTypeID("Lyr "), charIDToTypeID("Ordn"), charIDToTypeID("Frnt"));
+        layerDescriptor.putReference(charIDToTypeID("null"), layerReference);
+        layerDescriptor.putBoolean(charIDToTypeID("MkVs"), false);
+        executeAction(charIDToTypeID("slct"), layerDescriptor, DialogModes.NO);
+        return this.getSelectedLayers()[0];
+    };
+    /**
      * get json format info of current document
      * 获取当前文档的JSON数据结构
      * @param notes
@@ -355,6 +393,9 @@ var Document = (function () {
             ad.putBoolean(stringIDToTypeID("getNotes"), true);
         }
         return executeAction(charIDToTypeID("getd"), ad, DialogModes.NO).getString(stringIDToTypeID("json"));
+    };
+    // TODO
+    Document.prototype.addLayer = function () {
     };
     /**
      * check if background layer exists
@@ -380,57 +421,18 @@ var Document = (function () {
     /**
      * get current selection, may be zero
      * 获取当前的选区,可能是0
-     * @returns {Rect}
+     * @returns {Selection}
      */
     Document.prototype.getSelection = function () {
         try {
-            var selection = activeDocument.selection.bounds;
-            return new Rect(selection[0].value, selection[1].value, selection[2].value - selection[0].value, selection[3].value - selection[1].value);
+            var selection_1 = activeDocument.selection.bounds;
+            var rect = new Rect(selection_1[0].value, selection_1[1].value, selection_1[2].value - selection_1[0].value, selection_1[3].value - selection_1[1].value);
+            var sel = new Selection(rect);
+            return sel;
         }
         catch (ex) {
-            return new Rect(0, 0, 0, 0);
-        }
-    };
-    /**
-     * select a selection with bounds
-     * 根据给定的尺寸生成一个选区
-     * @param bounds
-     * @returns {Rect}
-     */
-    Document.prototype.setSelection = function (bounds) {
-        var size = this.getSize();
-        var documentBounds = new Rect(0, 0, size.width, size.height);
-        var bounds = documentBounds.intersect(bounds);
-        if (bounds == null)
             return null;
-        var selectionMode = charIDToTypeID("setd");
-        var selectionDescriptor = new ActionDescriptor();
-        var selectionReference = new ActionReference();
-        selectionReference.putProperty(charIDToTypeID("Chnl"), charIDToTypeID("fsel"));
-        selectionDescriptor.putReference(charIDToTypeID("null"), selectionReference);
-        selectionDescriptor.putObject(charIDToTypeID("T   "), charIDToTypeID("Rctn"), bounds.toDescriptor());
-        executeAction(selectionMode, selectionDescriptor, DialogModes.NO);
-        return bounds;
-    };
-    /**
-     * delsect selection
-     * 取消选区
-     */
-    Document.prototype.deselectSelection = function () {
-        var selectionDescriptor = new ActionDescriptor();
-        var selectionReference = new ActionReference();
-        selectionReference.putProperty(charIDToTypeID("Chnl"), charIDToTypeID("fsel"));
-        selectionDescriptor.putReference(charIDToTypeID("null"), selectionReference);
-        selectionDescriptor.putEnumerated(charIDToTypeID("T   "), charIDToTypeID("Ordn"), charIDToTypeID("None"));
-        executeAction(charIDToTypeID("setd"), selectionDescriptor, DialogModes.NO);
-    };
-    /**
-     * invert selection
-     * 反转当前选区
-     */
-    Document.prototype.invertSelection = function () {
-        var idInvs = charIDToTypeID("Invs");
-        executeAction(idInvs, undefined, DialogModes.NO);
+        }
     };
     /**
      * get current open document ID
