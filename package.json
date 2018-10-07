@@ -1,0 +1,30 @@
+{
+  "name": "photoshop-script-api",
+  "version": "1.0.0",
+  "description": "photoshop scripting api",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/emptykid/photoshop-script-api.git"
+  },
+  "keywords": [
+    "photoshop",
+    "script"
+  ],
+  "author": "xiaoqiang",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/emptykid/photoshop-script-api/issues"
+  },
+  "homepage": "https://github.com/emptykid/photoshop-script-api#readme",
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-concat": "^2.6.1"
+  }
+}

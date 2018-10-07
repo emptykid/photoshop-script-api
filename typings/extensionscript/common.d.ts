@@ -18,6 +18,17 @@ declare class $ {
     static sleep:any;
 }
 
+declare class Folder {
+    constructor(path:string);
+    exists:boolean;
+    getFiles(suffix:string):any;
+}
+
+declare class File {
+    constructor(path:string);
+    exists:boolean;
+}
+
 declare class DialogModes {
     static NO:number;
 }
@@ -63,5 +74,5 @@ declare function console_error(file:string, line:number, ex:string);
 declare function console_debug(msg:string);
 declare function charIDToTypeID(key:string):number;
 declare function stringIDToTypeID(key:string):number;
-declare function executeAction(key:number, desc:ActionDescriptor, dialog:number):void;
+declare function executeAction(key:number, desc:ActionDescriptor, dialog:number):any;
 declare function executeActionGet(ref:ActionReference):ActionDescriptor;
