@@ -85,7 +85,7 @@ class Canvas {
 
         }
 
-        OnRender();
+        OnRender.apply(this);
         this.shapes.length = 0;
     }
 

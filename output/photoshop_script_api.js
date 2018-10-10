@@ -126,7 +126,7 @@ var Canvas = (function () {
                 executeAction(charIDToTypeID("AddT"), desc453, DialogModes.NO);
             }
         }
-        OnRender();
+        OnRender.apply(this);
         this.shapes.length = 0;
     };
     return Canvas;
@@ -1457,28 +1457,6 @@ var Layer = (function () {
 /**
  * Created by xiaoqiang on 2018/10/6.
  */
-var Point = (function () {
-    function Point(x, y) {
-        this.X = x;
-        this.Y = y;
-    }
-    Point.prototype.toString = function () {
-        return this.X + "," + this.Y;
-    };
-    Point.prototype.toDescriptor = function (pointType) {
-        if (pointType == null)
-            pointType = charIDToTypeID("#Pxl");
-        var result = new ActionDescriptor();
-        result.putUnitDouble(charIDToTypeID("Hrzn"), pointType, this.X);
-        result.putUnitDouble(charIDToTypeID("Vrtc"), pointType, this.Y);
-        return result;
-    };
-    return Point;
-}());
-//# sourceMappingURL=Point.js.map
-/**
- * Created by xiaoqiang on 2018/10/6.
- */
 var Rect = (function () {
     function Rect(x, y, w, h) {
         this.X = x;
@@ -1566,6 +1544,29 @@ var Rect = (function () {
 /**
  * Created by xiaoqiang on 2018/10/6.
  */
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
+var Point = (function () {
+    function Point(x, y) {
+        this.X = x;
+        this.Y = y;
+    }
+    Point.prototype.toString = function () {
+        return this.X + "," + this.Y;
+    };
+    Point.prototype.toDescriptor = function (pointType) {
+        if (pointType == null)
+            pointType = charIDToTypeID("#Pxl");
+        var result = new ActionDescriptor();
+        result.putUnitDouble(charIDToTypeID("Hrzn"), pointType, this.X);
+        result.putUnitDouble(charIDToTypeID("Vrtc"), pointType, this.Y);
+        return result;
+    };
+    return Point;
+}());
 var Line = (function () {
     function Line(x, y, len, horiz) {
         this.descriptorType = charIDToTypeID("Ln  ");
@@ -1589,7 +1590,6 @@ var Line = (function () {
     };
     return Line;
 }());
-;
 var Rectangle = (function () {
     function Rectangle(x, y, w, h, rad) {
         this.descriptorType = charIDToTypeID("Rctn");
@@ -1608,14 +1608,14 @@ var Rectangle = (function () {
     };
     return Rectangle;
 }());
-var Ellipse = (function () {
+var Ellipse = (function (_super) {
+    __extends(Ellipse, _super);
     function Ellipse(x, y, width, height) {
+        _super.call(this, x, y, width, height);
         this.descriptorType = charIDToTypeID("Elps");
-        this.createDescriptor = Rectangle.prototype.createDescriptor;
-        Rectangle.apply(this, arguments);
     }
     return Ellipse;
-}());
+}(Rectangle));
 //# sourceMappingURL=Shapes.js.map
 /**
  * Created by xiaoqiang on 2018/10/7.

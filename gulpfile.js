@@ -24,7 +24,6 @@ gulp.task('copySrc', function () {
         'src/History.js',
         'src/json2.js',
         'src/Layer.js',
-        'src/Point.js',
         'src/Rect.js',
         'src/Shapes.js',
         'src/Selection.js',
