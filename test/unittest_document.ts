@@ -12,7 +12,6 @@ $.evalFile(test + '../output/photoshop_script_api.js');
 // -------------------------------------
 // test start
 
-/*
 let doc = Document.add(300, 300, "test_abc");
 CHECK_EQ(doc.getName(), 'test_abc', 'getName');
 CHECK_EQ(doc.getResolution(), 72, 'getResolution');
@@ -53,7 +52,6 @@ let artboards = doc2.getArtboardList();
 let art = artboards[0];
 CHECK_EQ(art.name, 'Artboard 1', 'artboard detail');
 doc2.close();
-*/
 
 // select layers
 let doc3 = App.open(test + '/assets/selected_layers.psd');
@@ -65,4 +63,3 @@ CHECK_EQ(targets.length, 1, 'find layer name Group 1');
 CHECK_EQ(targets[0].getName(), 'Group 1', 'equal name after find layer');
 let targets2 = doc3.getLayersByName('Rectangle 1');
 CHECK_EQ(targets2[0].getBounds().size().width, 201, 'find layer inside group');
-//doc3.setSelectedLayers(targets2);
