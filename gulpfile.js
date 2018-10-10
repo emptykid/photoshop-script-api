@@ -18,15 +18,15 @@ gulp.task('init', function () {
 gulp.task('copySrc', function () {
     gulp.src(['src/Application.js',
         'src/Artboard.js',
+        'src/Canvas.js',
         'src/Color.js',
         'src/Document.js',
         'src/History.js',
         'src/json2.js',
         'src/Layer.js',
-        'src/Line.js',
         'src/Point.js',
         'src/Rect.js',
-        'src/Rectangle.js',
+        'src/Shapes.js',
         'src/Selection.js',
         'src/Size.js'])
         .pipe(concat('photoshop_script_api.js'))

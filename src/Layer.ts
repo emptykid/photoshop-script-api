@@ -2,6 +2,8 @@
  * Created by xiaoqiang on 2018/10/6.
  */
 
+const enum Kind {NORMAL = 1, TEXT = 3, VECTOR = 4};
+
 class Layer {
     id:number;
 
@@ -143,6 +145,32 @@ class Layer {
     }
 
     /**
+     * check if current layer is a text layer
+     * 判断当前图层是否是文字图层
+     * @returns {boolean}
+     */
+    public isTextLayer():boolean {
+        var layerReference = new ActionReference();
+        layerReference.putProperty(charIDToTypeID("Prpr"), charIDToTypeID("Txt "));
+        layerReference.putIdentifier(charIDToTypeID("Lyr "), this.id);
+        var descriptor = executeActionGet(layerReference);
+        return descriptor.hasKey(charIDToTypeID("Txt "));
+    }
+
+    /**
+     * check layer is a vector layer
+     * 判断当前图层是否是形状图层
+     * @returns {boolean}
+     */
+    public isShapeLayer():boolean {
+        var layerReference = new ActionReference();
+        layerReference.putIdentifier(charIDToTypeID("Lyr "), this.id);
+        var descriptor = executeActionGet(layerReference);
+        var kind:number = descriptor.getInteger(stringIDToTypeID('layerKind'));
+        return kind == Kind.VECTOR;
+    }
+
+    /**
      * check layer is a group
      * 判断当前图层是一个图层组
      * @returns {boolean}
@@ -186,6 +214,43 @@ class Layer {
         let sel = new Selection(rect);
         sel.create();
         return sel;
+    }
+
+    /**
+     * rasterize the layer
+     * 栅格化图层
+     */
+    public rasterize():void {
+        var desc7 = new ActionDescriptor();
+        var ref4 = new ActionReference();
+        ref4.putIdentifier(charIDToTypeID("Lyr "), this.id);
+        desc7.putReference( charIDToTypeID( "null" ), ref4 );
+        executeAction( stringIDToTypeID( "rasterizeLayer" ), desc7, DialogModes.NO );
+    }
+
+    /**
+     * transform the layer with percent value
+     * 自由变化图层大小
+     * @example  tranform(200, 200)
+     *
+     * @param width  percent
+     * @param height percent
+     */
+    public transform(width:number, height:number):void {
+        this.select();
+        var desc11 = new ActionDescriptor();
+        var ref5 = new ActionReference();
+        ref5.putEnumerated( charIDToTypeID( "Lyr " ), charIDToTypeID( "Ordn" ), charIDToTypeID( "Trgt" ));
+        desc11.putReference( charIDToTypeID( "null" ), ref5 );
+        desc11.putEnumerated( charIDToTypeID( "FTcs" ), charIDToTypeID( "QCSt" ), charIDToTypeID( "Qcsa" ));
+        var desc12 = new ActionDescriptor();
+        desc12.putUnitDouble( charIDToTypeID( "Hrzn" ), charIDToTypeID( "#Pxl" ), 0.000000 );
+        desc12.putUnitDouble( charIDToTypeID( "Vrtc" ), charIDToTypeID( "#Pxl" ), 0.000000 );
+        desc11.putObject( charIDToTypeID( "Ofst" ), charIDToTypeID( "Ofst" ), desc12 );
+        desc11.putUnitDouble( charIDToTypeID( "Wdth" ), charIDToTypeID( "#Prc" ), width );
+        desc11.putUnitDouble( charIDToTypeID( "Hght" ), charIDToTypeID( "#Prc" ), height );
+        desc11.putEnumerated( charIDToTypeID( "Intr" ), charIDToTypeID( "Intp" ), charIDToTypeID( "Bcbc" ));
+        executeAction( charIDToTypeID( "Trnf" ), desc11, DialogModes.NO );
     }
 
 

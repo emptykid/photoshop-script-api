@@ -53,6 +53,86 @@ var Artboard = (function () {
 }());
 //# sourceMappingURL=Artboard.js.map
 /**
+ * Created by xiaoqiang on 2018/10/10.
+ */
+var Canvas = (function () {
+    function Canvas() {
+        this.shapes = [];
+        this.fill = new Color(255, 0, 0);
+        this.opacity = 100;
+    }
+    /**
+     * add a Line shape to canvas
+     * 给当前画布添加一条线段
+     * @param x
+     * @param y
+     * @param length
+     * @param horizontal
+     */
+    Canvas.prototype.addLine = function (x, y, length, horizontal) {
+        this.shapes.push(new Line(Math.round(x), Math.round(y), Math.round(length), horizontal));
+    };
+    /**
+     * add a rectangle to canvas
+     * 给当前画布添加一个矩形
+     * @param x
+     * @param y
+     * @param width
+     * @param height
+     * @param radius
+     */
+    Canvas.prototype.addRectangle = function (x, y, width, height, radius) {
+        this.shapes.push(new Rectangle(x, y, width, height, radius));
+    };
+    /**
+     * add a ellipse to canvas
+     * 给当前画布添加一个椭圆
+     * @param x
+     * @param y
+     * @param width
+     * @param height
+     */
+    Canvas.prototype.addEllipse = function (x, y, width, height) {
+        this.shapes.push(new Ellipse(Math.round(x), Math.round(y), Math.round(width), Math.round(height)));
+    };
+    /**
+     * draw the shapes that added
+     * 绘制添加的形状
+     */
+    Canvas.prototype.drawShapes = function () {
+        if (this.shapes.length == 0) {
+            return;
+        }
+        //activeDocument.suspendHistory ("Render Canvas Drawing", "OnRender.apply(this)");
+        function OnRender() {
+            var desc448 = new ActionDescriptor();
+            var ref321 = new ActionReference();
+            ref321.putClass(stringIDToTypeID("contentLayer"));
+            desc448.putReference(charIDToTypeID("null"), ref321);
+            var layerDescriptor = new ActionDescriptor();
+            var solidColorLayerDescriptor = new ActionDescriptor();
+            solidColorLayerDescriptor.putObject(charIDToTypeID("Clr "), charIDToTypeID("RGBC"), this.fill.toDescriptor());
+            layerDescriptor.putUnitDouble(charIDToTypeID("Opct"), charIDToTypeID("#Prc"), this.opacity);
+            layerDescriptor.putObject(charIDToTypeID("Type"), stringIDToTypeID("solidColorLayer"), solidColorLayerDescriptor);
+            layerDescriptor.putObject(charIDToTypeID("Shp "), this.shapes[0].descriptorType, this.shapes[0].createDescriptor());
+            desc448.putObject(charIDToTypeID("Usng"), stringIDToTypeID("contentLayer"), layerDescriptor);
+            executeAction(charIDToTypeID("Mk  "), desc448, DialogModes.NO);
+            for (var i = 1; i < this.shapes.length; i++) {
+                var desc453 = new ActionDescriptor();
+                var ref322 = new ActionReference();
+                ref322.putEnumerated(charIDToTypeID("Path"), charIDToTypeID("Ordn"), charIDToTypeID("Trgt"));
+                desc453.putReference(charIDToTypeID("null"), ref322);
+                desc453.putObject(charIDToTypeID("T   "), this.shapes[i].descriptorType, this.shapes[i].createDescriptor());
+                executeAction(charIDToTypeID("AddT"), desc453, DialogModes.NO);
+            }
+        }
+        OnRender();
+        this.shapes.length = 0;
+    };
+    return Canvas;
+}());
+//# sourceMappingURL=Canvas.js.map
+/**
  * Created by xiaoqiang on 2018/10/6.
  */
 var Color = (function () {
@@ -195,6 +275,17 @@ var Document = (function () {
         documentDescriptor.putReference(charIDToTypeID("null"), documentReference);
         executeAction(charIDToTypeID("Dplc"), documentDescriptor, DialogModes.NO);
         return new Document();
+    };
+    /**
+     * set document to active
+     * 设置文档为活跃状态
+     */
+    Document.prototype.active = function () {
+        var documentDescriptor = new ActionDescriptor();
+        var documentReference = new ActionReference();
+        documentReference.putIdentifier(charIDToTypeID("Dcmn"), this.id);
+        documentDescriptor.putReference(charIDToTypeID("null"), documentReference);
+        executeAction(charIDToTypeID("slct"), documentDescriptor, DialogModes.NO);
     };
     /**
      * trim current document transparent area
@@ -1124,6 +1215,7 @@ if (typeof JSON !== 'object') {
 /**
  * Created by xiaoqiang on 2018/10/6.
  */
+;
 var Layer = (function () {
     function Layer(id) {
         this.id = id;
@@ -1257,6 +1349,30 @@ var Layer = (function () {
         return descriptor.getBoolean(charIDToTypeID("Vsbl"));
     };
     /**
+     * check if current layer is a text layer
+     * 判断当前图层是否是文字图层
+     * @returns {boolean}
+     */
+    Layer.prototype.isTextLayer = function () {
+        var layerReference = new ActionReference();
+        layerReference.putProperty(charIDToTypeID("Prpr"), charIDToTypeID("Txt "));
+        layerReference.putIdentifier(charIDToTypeID("Lyr "), this.id);
+        var descriptor = executeActionGet(layerReference);
+        return descriptor.hasKey(charIDToTypeID("Txt "));
+    };
+    /**
+     * check layer is a vector layer
+     * 判断当前图层是否是形状图层
+     * @returns {boolean}
+     */
+    Layer.prototype.isShapeLayer = function () {
+        var layerReference = new ActionReference();
+        layerReference.putIdentifier(charIDToTypeID("Lyr "), this.id);
+        var descriptor = executeActionGet(layerReference);
+        var kind = descriptor.getInteger(stringIDToTypeID('layerKind'));
+        return kind == 4 /* VECTOR */;
+    };
+    /**
      * check layer is a group
      * 判断当前图层是一个图层组
      * @returns {boolean}
@@ -1300,36 +1416,44 @@ var Layer = (function () {
         sel.create();
         return sel;
     };
+    /**
+     * rasterize the layer
+     * 栅格化图层
+     */
+    Layer.prototype.rasterize = function () {
+        var desc7 = new ActionDescriptor();
+        var ref4 = new ActionReference();
+        ref4.putIdentifier(charIDToTypeID("Lyr "), this.id);
+        desc7.putReference(charIDToTypeID("null"), ref4);
+        executeAction(stringIDToTypeID("rasterizeLayer"), desc7, DialogModes.NO);
+    };
+    /**
+     * transform the layer with percent value
+     * 自由变化图层大小
+     * @example  tranform(200, 200)
+     *
+     * @param width  percent
+     * @param height percent
+     */
+    Layer.prototype.transform = function (width, height) {
+        this.select();
+        var desc11 = new ActionDescriptor();
+        var ref5 = new ActionReference();
+        ref5.putEnumerated(charIDToTypeID("Lyr "), charIDToTypeID("Ordn"), charIDToTypeID("Trgt"));
+        desc11.putReference(charIDToTypeID("null"), ref5);
+        desc11.putEnumerated(charIDToTypeID("FTcs"), charIDToTypeID("QCSt"), charIDToTypeID("Qcsa"));
+        var desc12 = new ActionDescriptor();
+        desc12.putUnitDouble(charIDToTypeID("Hrzn"), charIDToTypeID("#Pxl"), 0.000000);
+        desc12.putUnitDouble(charIDToTypeID("Vrtc"), charIDToTypeID("#Pxl"), 0.000000);
+        desc11.putObject(charIDToTypeID("Ofst"), charIDToTypeID("Ofst"), desc12);
+        desc11.putUnitDouble(charIDToTypeID("Wdth"), charIDToTypeID("#Prc"), width);
+        desc11.putUnitDouble(charIDToTypeID("Hght"), charIDToTypeID("#Prc"), height);
+        desc11.putEnumerated(charIDToTypeID("Intr"), charIDToTypeID("Intp"), charIDToTypeID("Bcbc"));
+        executeAction(charIDToTypeID("Trnf"), desc11, DialogModes.NO);
+    };
     return Layer;
 }());
 //# sourceMappingURL=Layer.js.map
-/**
- * Created by xiaoqiang on 2018/10/6.
- */
-var Line = (function () {
-    function Line(x, y, len, horiz) {
-        this.descriptorType = charIDToTypeID("Ln  ");
-        this.X = x;
-        this.Y = y;
-        this.length = len;
-        this.horizontal = horiz;
-    }
-    Line.prototype.createDescriptor = function () {
-        var lineDescriptor = new ActionDescriptor();
-        var x1 = this.X + (this.horizontal == false ? 0.5 : 0);
-        var y1 = this.Y + (this.horizontal ? 0.5 : 0);
-        var x2 = x1 + (this.horizontal ? this.length : 0);
-        var y2 = y1 + (this.horizontal == false ? this.length : 0);
-        var p1 = new Point(x1, y1);
-        var p2 = new Point(x2, y2);
-        lineDescriptor.putObject(charIDToTypeID("Strt"), charIDToTypeID("Pnt "), p1.toDescriptor());
-        lineDescriptor.putObject(charIDToTypeID("End "), charIDToTypeID("Pnt "), p2.toDescriptor());
-        lineDescriptor.putUnitDouble(charIDToTypeID("Wdth"), charIDToTypeID("#Pxl"), 1.000000);
-        return lineDescriptor;
-    };
-    return Line;
-}());
-//# sourceMappingURL=Line.js.map
 /**
  * Created by xiaoqiang on 2018/10/6.
  */
@@ -1442,6 +1566,30 @@ var Rect = (function () {
 /**
  * Created by xiaoqiang on 2018/10/6.
  */
+var Line = (function () {
+    function Line(x, y, len, horiz) {
+        this.descriptorType = charIDToTypeID("Ln  ");
+        this.X = x;
+        this.Y = y;
+        this.length = len;
+        this.horizontal = horiz;
+    }
+    Line.prototype.createDescriptor = function () {
+        var lineDescriptor = new ActionDescriptor();
+        var x1 = this.X + (this.horizontal == false ? 0.5 : 0);
+        var y1 = this.Y + (this.horizontal ? 0.5 : 0);
+        var x2 = x1 + (this.horizontal ? this.length : 0);
+        var y2 = y1 + (this.horizontal == false ? this.length : 0);
+        var p1 = new Point(x1, y1);
+        var p2 = new Point(x2, y2);
+        lineDescriptor.putObject(charIDToTypeID("Strt"), charIDToTypeID("Pnt "), p1.toDescriptor());
+        lineDescriptor.putObject(charIDToTypeID("End "), charIDToTypeID("Pnt "), p2.toDescriptor());
+        lineDescriptor.putUnitDouble(charIDToTypeID("Wdth"), charIDToTypeID("#Pxl"), 1.000000);
+        return lineDescriptor;
+    };
+    return Line;
+}());
+;
 var Rectangle = (function () {
     function Rectangle(x, y, w, h, rad) {
         this.descriptorType = charIDToTypeID("Rctn");
@@ -1468,7 +1616,7 @@ var Ellipse = (function () {
     }
     return Ellipse;
 }());
-//# sourceMappingURL=Rectangle.js.map
+//# sourceMappingURL=Shapes.js.map
 /**
  * Created by xiaoqiang on 2018/10/7.
  */

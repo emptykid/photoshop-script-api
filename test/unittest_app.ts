@@ -10,10 +10,12 @@ $.evalFile(test + './test_base.js');
 $.evalFile(test + '../output/photoshop_script_api.js');
 
 // test start
-let doc = App.open(test + '/assets/document_trim.psd');
+let doc = App.open(test + '/assets/selected_layers.psd');
+/*
 CHECK_EQ(doc.getName(), 'document_trim.psd', 'check document open');
 CHECK_EQ(doc.getSize().width, 500, 'check document width');
 CHECK_EQ(doc.getSize().height, 500, 'check document height');
-
+*/
+$.write(doc.getJSONInfo());
 
 
