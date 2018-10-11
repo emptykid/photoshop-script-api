@@ -4,7 +4,7 @@
  * @desc  全局App对象, 对应整个PS应用程序
  * @desc_en  Global App object, map to photoshop Application
  */
-var App = (function () {
+var App = /** @class */ (function () {
     function App() {
     }
     /**

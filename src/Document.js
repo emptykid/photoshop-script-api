@@ -4,7 +4,7 @@
  * @desc 一个PSD文档对象
  *       A PSD Document Object
  */
-var Document = (function () {
+var Document = /** @class */ (function () {
     function Document() {
         this.id = this.getID();
     }
