@@ -1,30 +1,32 @@
 {
   "name": "photoshop-script-api",
-  "version": "1.0.0",
-  "description": "photoshop scripting api",
-  "main": "index.js",
-  "directories": {
-    "test": "test"
-  },
+  "version": "0.0.1",
+  "description": "photoshop script api 此项目旨在实现一套完整的API，用来封装photoshop插件开发过程中，宿主提供的能力合集。",
+  "main": "index.jsx",
+  "types": "index.d.ts",
   "scripts": {
-    "test": "test"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack --mode=production",
+    "build:watch": "webpack --mode=production --watch"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/emptykid/photoshop-script-api.git"
+    "url": "git+https://github.com/cutterman-cn/ud-script-api.git"
   },
-  "keywords": [
-    "photoshop",
-    "script"
-  ],
   "author": "xiaoqiang",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/emptykid/photoshop-script-api/issues"
+    "url": "https://github.com/cutterman-cn/ud-script-api/issues"
   },
-  "homepage": "https://github.com/emptykid/photoshop-script-api#readme",
+  "homepage": "https://github.com/cutterman-cn/ud-script-api#readme",
   "devDependencies": {
-    "gulp": "^3.9.1",
-    "gulp-concat": "^2.6.1"
-  }
+    "babel-loader": "^8.2.2",
+    "ps-extendscript-types": "^1.0.2",
+    "ts-loader": "^9.2.4",
+    "uglifyjs-webpack-plugin": "^2.2.0",
+    "webpack": "^5.47.0",
+    "webpack-cli": "3.3.12",
+    "webpack-dev-server": "^3.11.2"
+  },
+  "dependencies": {}
 }

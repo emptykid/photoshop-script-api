@@ -1,12 +1,15 @@
 {
-  "compilerOptions": {
-    "module": "None",
-    "target": "es5",
-    "noImplicitAny": false,
-    "sourceMap": true
-  },
-  "exclude": [
-    "node_modules",
-    "lib.d.ts"
-  ]
+    "compilerOptions": {
+        "module": "es6",
+        "target": "ES5",
+        "outDir": "./dist/",
+        "noImplicitAny": true,
+        "declaration": true,
+        "skipLibCheck": true,
+        "typeRoots": ["./typings"],
+        "sourceMap": true
+    },
+    "exclude": [
+        "node_modules"
+    ]
 }
