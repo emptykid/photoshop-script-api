@@ -3,6 +3,7 @@ const path = require('path');
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 
 //const plugin_dir = "/Users/xiaoqiang/Projects/cutterman-cn/cutterman-photoshop-panel/src/jsx";
+//const plugin_dir = "/Users/xiaoqiang/Library/Application Support/Adobe/CEP/extensions/com.cutterman.cutterman.panel.unsigned/panel/assets/jsx";
 const plugin_dir = "./dist";
 const dist_dir = "./dist";
 
@@ -12,7 +13,11 @@ module.exports = (env, argv) => {
         mode: 'production',
         target: ['web', 'es5'],
         entry: {
-            index: './src/index.ts'
+            index: './src/index.ts',
+            /*
+            app: './src/Cutterman.ts',
+            test: './src/Test.ts'
+             */
         },
         resolve: {
             extensions: ['.js', '.ts', '.json'],

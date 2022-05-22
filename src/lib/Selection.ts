@@ -12,7 +12,17 @@ export class Selection  {
         this.bounds = rect;
     }
 
-    create(): void {
+    static get(): Selection | null {
+        try {
+            const selection = app.activeDocument.selection.bounds;
+            const rect = new Rect(selection[0].value, selection[1].value, selection[2].value - selection[0].value, selection[3].value - selection[1].value);
+            return new Selection(rect);
+        } catch (ex) {
+            return null;
+        }
+    }
+
+    create(): Selection {
         const selectionMode = app.charIDToTypeID("setd");
         const selectionDescriptor = new ActionDescriptor();
         const selectionReference = new ActionReference();
@@ -20,6 +30,7 @@ export class Selection  {
         selectionDescriptor.putReference(app.charIDToTypeID("null"), selectionReference);
         selectionDescriptor.putObject(app.charIDToTypeID("T   "), app.charIDToTypeID("Rctn"), this.bounds.toDescriptor());
         app.executeAction(selectionMode, selectionDescriptor, DialogModes.NO);
+        return this;
     }
 
     deselect(): void {

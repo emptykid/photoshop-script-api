@@ -530,6 +530,11 @@ caniuse-lite@^1.0.30001317:
   resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001322.tgz#2e4c09d11e1e8f852767dab287069a8d0c29d623"
   integrity sha512-neRmrmIrCGuMnxGSoh+x7zYtQFFgnSY2jaomjU56sCkTA6JINqQrxutF459JpWcWRajvoyn95sOXq4Pqrnyjew==
 
+cep-shim@^4.5.12:
+  version "4.5.12"
+  resolved "https://registry.npmmirror.com/cep-shim/-/cep-shim-4.5.12.tgz#8a759ff3c1dbf5e8757b83657fe211f9165e6fee"
+  integrity sha512-CRtyfx5ToTWCF0e/yxB0dUvrOcDhAhJPGAR+WFsFOGztJ+qf4uoZ6nY17+mJYhK5I1VrSzMYa3TqtLaULGhYkA==
+
 chalk@^2.4.2:
   version "2.4.2"
   resolved "https://registry.yarnpkg.com/chalk/-/chalk-2.4.2.tgz#cd42541677a54333cf541a49108c1432b44c9424"
@@ -1091,6 +1096,11 @@ extend-shallow@^3.0.0, extend-shallow@^3.0.2:
   dependencies:
     assign-symbols "^1.0.0"
     is-extendable "^1.0.1"
+
+extendscript-es5-shim@^0.3.1:
+  version "0.3.1"
+  resolved "https://registry.npmmirror.com/extendscript-es5-shim/-/extendscript-es5-shim-0.3.1.tgz#6e0e6bbdfb17b7c4723f76bbc5d8e22e4fbb4ed5"
+  integrity sha512-mCnq5G1xe+jHG2ob6Qt5kEqACNAsje7ppYTLethSAlWTZ+zRgOlNFsRkkVcgKw5xJJsM4iE70jHMhn1iD0xa6Q==
 
 extglob@^2.0.4:
   version "2.0.4"

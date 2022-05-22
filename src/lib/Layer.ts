@@ -92,6 +92,39 @@ export class Layer {
         app.executeAction(app.charIDToTypeID("slct"), desc, DialogModes.NO);
     }
 
+    /**
+     * select layer by id
+     * @param idList
+     */
+    static selectLayersById(idList: number[]): void {
+        const current = new ActionReference();
+        for (let i = 0; i < idList.length; i++) {
+            current.putIdentifier(app.charIDToTypeID("Lyr "), idList[i]);
+        }
+        const desc = new ActionDescriptor();
+        desc.putReference(app.charIDToTypeID("null"), current);
+        app.executeAction(app.charIDToTypeID("slct"), desc, DialogModes.NO);
+    }
+
+    /**
+     * show/hide layers by id list provided
+     * @param idList
+     * @param show
+     */
+    static toggleLayersById(idList: number[], show: boolean): void {
+        if (idList.length == 0){ return;}
+        const current = new ActionReference();
+        const desc242 = new ActionDescriptor();
+        const list10 = new ActionList();
+        for(let i=0; i< idList.length; i++) {
+            current.putIdentifier(app.charIDToTypeID("Lyr "), idList[i]);
+        }
+        list10.putReference( current );
+        desc242.putList( app.charIDToTypeID( "null" ), list10 );
+        const key = (show)? "Shw " : "Hd  ";
+        app.executeAction( app.charIDToTypeID( key ), desc242, DialogModes.NO );
+    }
+
 
     /**
      * quick to get one selected layer
@@ -194,6 +227,46 @@ export class Layer {
         }
     }
 
+    static hasArtboards(): boolean {
+        return this.getArtboardList().length > 0;
+    }
+
+    static getArtboardList(): Layer[] {
+        let result = [];
+        const theRef = new ActionReference();
+        theRef.putProperty(app.charIDToTypeID('Prpr'), app.stringIDToTypeID("artboards"));
+        theRef.putEnumerated(app.charIDToTypeID('Dcmn'), app.charIDToTypeID('Ordn'), app.charIDToTypeID('Trgt'));
+        const getDescriptor = new ActionDescriptor();
+        getDescriptor.putReference(app.stringIDToTypeID("null"), theRef);
+        const abDesc = app.executeAction(app.charIDToTypeID("getd"), getDescriptor, DialogModes.NO).getObjectValue(app.stringIDToTypeID("artboards"));
+        const abCount = abDesc.getList(app.stringIDToTypeID('list')).count;
+        if (abCount > 0) {
+            for (let i = 0; i < abCount; ++i) {
+                const abObj = abDesc.getList(app.stringIDToTypeID('list')).getObjectValue(i);
+                const abTopIndex = abObj.getInteger(app.stringIDToTypeID("top"));
+                const ref = new ActionReference();
+                ref.putIndex(app.charIDToTypeID("Lyr "), abTopIndex + 1);
+                const layerDesc = app.executeActionGet(ref);
+                if (layerDesc.getBoolean(app.stringIDToTypeID("artboardEnabled")) == true) {    // is artboard
+                    const theID = layerDesc.getInteger(app.stringIDToTypeID('layerID'));
+                    const art: Layer = new Layer(theID);
+                    result.push(art);
+                }
+            }
+        }
+
+        return result;
+    }
+
+
+    static hasBackgroundLayer(): boolean {
+        const backgroundReference = new ActionReference();
+        backgroundReference.putProperty(app.charIDToTypeID("Prpr"), app.charIDToTypeID("Bckg"));
+        backgroundReference.putEnumerated(app.charIDToTypeID("Lyr "), app.charIDToTypeID("Ordn"), app.charIDToTypeID("Back"));
+        const backgroundDescriptor = app.executeActionGet(backgroundReference);
+        return backgroundDescriptor.getBoolean(app.charIDToTypeID("Bckg"));
+    }
+
     name(): string {
         const layerReference = new ActionReference();
         layerReference.putProperty(app.charIDToTypeID("Prpr"), app.charIDToTypeID("Nm  "));
@@ -235,7 +308,7 @@ export class Layer {
         return descriptor.getInteger(app.stringIDToTypeID("layerKind"));
     }
 
-    getSubLayerIds(): string[] {
+    getSubLayerIds(): number[] {
         const result = [];
         if (this.isGroupLayer()) {
             this.select();
@@ -243,21 +316,14 @@ export class Layer {
             for (let i=0; i<layerSet.layers.length; i++) {
                 // @ts-ignore
                 const layer = layerSet.layers[i];
-                result.push(layer.id + "");
+                result.push(layer.id);
             }
         }
         return result;
     }
 
+    // 当前只对非图层组有效
     bounds(): Rect {
-        //this.select();
-        const bounds = app.activeDocument.activeLayer.bounds;
-        const left = Math.round(bounds[0].as("px"));
-        const top = Math.round(bounds[1].as("px"));
-        const right = Math.round(bounds[2].as("px"));
-        const bottom = Math.round(bounds[3].as("px"));
-        return new Rect(left, top, right - left, bottom - top);
-        /*
         const layerReference = new ActionReference();
         layerReference.putProperty(app.charIDToTypeID("Prpr"), app.stringIDToTypeID("bounds"));
         layerReference.putIdentifier(app.charIDToTypeID("Lyr "), this.id);
@@ -268,8 +334,18 @@ export class Layer {
         const right = rectangle.getUnitDoubleValue(app.charIDToTypeID("Rght"));
         const bottom = rectangle.getUnitDoubleValue(app.charIDToTypeID("Btom"));
         return new Rect(left, top, (right - left), (bottom - top));
-        */
     }
+
+    // 适用于图层组的场景，确保当前图层已经被选中
+    boundsActive(): Rect {
+        const bounds = app.activeDocument.activeLayer.bounds;
+        const left = Math.round(bounds[0].as("px"));
+        const top = Math.round(bounds[1].as("px"));
+        const right = Math.round(bounds[2].as("px"));
+        const bottom = Math.round(bounds[3].as("px"));
+        return new Rect(left, top, right - left, bottom - top);
+    }
+
 
     size(): Size {
         return this.bounds().size();
@@ -596,29 +672,17 @@ export class Layer {
         return this;
     }
 
-    duplicate(newDoc?: boolean) {
-        if (newDoc) {
-            const desc1 = new ActionDescriptor();
-            const ref1 = new ActionReference();
-            ref1.putClass(app.stringIDToTypeID("document"));
-            desc1.putReference(app.stringIDToTypeID("null"), ref1);
-            const ref2 = new ActionReference();
-            ref2.putEnumerated(app.stringIDToTypeID("layer"), app.stringIDToTypeID("ordinal"), app.stringIDToTypeID("targetEnum"));
-            desc1.putReference(app.stringIDToTypeID("using"), ref2);
-            desc1.putInteger(app.stringIDToTypeID("version"), 5);
-            app.executeAction(app.stringIDToTypeID("make"), desc1, DialogModes.NO);
-        } else {
-            const d = new Document();
-            const desc1 = new ActionDescriptor();
-            const ref1 = new ActionReference();
-            ref1.putEnumerated(app.stringIDToTypeID("layer"), app.stringIDToTypeID("ordinal"), app.stringIDToTypeID("targetEnum"));
-            desc1.putReference(app.stringIDToTypeID("null"), ref1);
-            desc1.putInteger(app.stringIDToTypeID("version"), 5);
-            const list1 = new ActionList();
-            list1.putInteger(d.id);
-            desc1.putList(app.stringIDToTypeID("ID"), list1);
-            app.executeAction(app.stringIDToTypeID("duplicate"), desc1, DialogModes.NO);
-        }
+    duplicate() {
+        const d = Document.activeDocument();
+        const desc1 = new ActionDescriptor();
+        const ref1 = new ActionReference();
+        ref1.putEnumerated(app.stringIDToTypeID("layer"), app.stringIDToTypeID("ordinal"), app.stringIDToTypeID("targetEnum"));
+        desc1.putReference(app.stringIDToTypeID("null"), ref1);
+        desc1.putInteger(app.stringIDToTypeID("version"), 5);
+        const list1 = new ActionList();
+        list1.putInteger(d.id);
+        desc1.putList(app.stringIDToTypeID("ID"), list1);
+        app.executeAction(app.stringIDToTypeID("duplicate"), desc1, DialogModes.NO);
 
     }
 }
