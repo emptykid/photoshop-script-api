@@ -17,7 +17,7 @@ export class Shape {
         throw new Error("Method not implemented.");
     }
 
-    draw(fillColor: Color, stroke: Stroke = null, opacity: number = 100): void {
+    draw(fillColor: Color, stroke: Stroke = null, opacity: number = 100, toLayer: number = 0): void {
         const desc448 = new ActionDescriptor();
         const ref321 = new ActionReference();
         ref321.putClass(app.stringIDToTypeID("contentLayer"));
@@ -39,6 +39,9 @@ export class Shape {
         layerDescriptor.putObject(app.charIDToTypeID("Shp "), this.descriptorType, this.toDescriptor());
 
         desc448.putObject(app.charIDToTypeID("Usng"), app.stringIDToTypeID("contentLayer"), layerDescriptor);
+        if (toLayer != 0) {
+            desc448.putInteger(app.stringIDToTypeID( "layerID" ), toLayer);
+        }
         app.executeAction(app.charIDToTypeID("Mk  "), desc448, DialogModes.NO);
     }
 

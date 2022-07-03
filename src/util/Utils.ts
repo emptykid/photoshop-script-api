@@ -45,4 +45,32 @@ export class Utils {
         f.close();
         return content;
     }
+
+    /**
+     * check file exists
+     * @param filepath
+     * @return boolean
+     */
+    static fileExists(filepath: string): boolean {
+        // @ts-ignore
+        const f = new File(filepath);
+        // @ts-ignore
+        return f.exists;
+    }
+
+    /**
+     * current os is mac or not
+     * return boolean
+     */
+    static isMac(): boolean {
+        return /mac/.test($.os.toLowerCase());
+    }
+
+    /**
+     * current os is windows or not
+     * return boolean
+     */
+    static isWin(): boolean {
+        return /win/.test($.os.toLowerCase());
+    }
 }

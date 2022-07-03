@@ -4,6 +4,18 @@
  * @description
  */
 
+export enum HostVersion {
+    Unknown,
+    CC2015 = 16,
+    CC2016 = 17,
+    CC2017 = 18,
+    CC2018 = 19,
+    CC2019 = 20,
+    CC2020 = 21,
+    CC2021 = 22,
+    CC2022 = 23
+}
+
 export class Application {
 
     private rulerUnits: Units;
@@ -34,6 +46,18 @@ export class Application {
         const result = app.executeAction(app.charIDToTypeID('getd'), desc, DialogModes.NO);
         //@ts-ignore
         return File.decode(result.getPath(kexecutablePathStr));
+    }
+
+    /**
+     * get current application host version
+     * @return HostVersion
+     */
+    public getHostVersion(): HostVersion {
+        const v = parseInt(app.version);
+        if (v>23 || v <16) {
+            return HostVersion.Unknown;
+        }
+        return v as HostVersion;
     }
 
     /**

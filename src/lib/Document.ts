@@ -68,6 +68,27 @@ export class Document {
         return new Document();
     }
 
+    static create(name: string, width: number, height: number, density: number = 72, artboard: boolean = false, background: boolean = false): Document {
+        const desc1 = new ActionDescriptor();
+        const desc2 = new ActionDescriptor();
+        desc2.putBoolean( app.stringIDToTypeID( "artboard" ), artboard);
+        desc2.putBoolean( app.stringIDToTypeID( "autoPromoteBackgroundLayer" ), background);
+        desc2.putClass( app.stringIDToTypeID( "mode" ), app.stringIDToTypeID( "RGBColorMode" ) );
+        desc2.putUnitDouble( app.stringIDToTypeID( "width" ), app.stringIDToTypeID( "distanceUnit" ), width );
+        desc2.putUnitDouble( app.stringIDToTypeID( "height" ), app.stringIDToTypeID( "distanceUnit" ), height );
+        desc2.putUnitDouble( app.stringIDToTypeID( "resolution" ), app.stringIDToTypeID( "densityUnit" ), density );
+        desc2.putDouble( app.stringIDToTypeID( "pixelScaleFactor" ), 1.000000 );
+        desc2.putEnumerated( app.stringIDToTypeID( "fill" ), app.stringIDToTypeID( "fill" ), app.stringIDToTypeID( "transparency" ) );
+        desc2.putInteger( app.stringIDToTypeID( "depth" ), 8 );
+        desc2.putString(app.stringIDToTypeID("name"), name);
+        desc2.putString( app.stringIDToTypeID( "profile" ), "sRGB IEC61966-2.1" );
+        var list1 = new ActionList();
+        desc2.putList( app.stringIDToTypeID( "guides" ), list1 );
+        desc1.putObject( app.stringIDToTypeID( "new" ), app.stringIDToTypeID( "document" ), desc2 );
+        app.executeAction( app.stringIDToTypeID( "make" ), desc1, DialogModes.NO );
+        return Document.activeDocument();
+    }
+
 
     /**
      * get current document name
@@ -137,7 +158,10 @@ export class Document {
             action.putBoolean(app.stringIDToTypeID("scaleStyles"), true);
             action.putBoolean(app.charIDToTypeID("CnsP"), true);
         }
-        action.putEnumerated(app.charIDToTypeID("Intr"), app.charIDToTypeID("Intp"), app.charIDToTypeID('Blnr'));
+        action.putBoolean( app.stringIDToTypeID( "constrainProportions" ), true );
+        //action.putEnumerated(app.charIDToTypeID("Intr"), app.charIDToTypeID("Intp"), app.charIDToTypeID('Blnr'));
+        action.putEnumerated( app.stringIDToTypeID( "interfaceIconFrameDimmed" ), app.stringIDToTypeID( "interpolationType" ), app.stringIDToTypeID( "bicubicSharper" ) );
+
         app.executeAction(app.charIDToTypeID("ImgS"), action, DialogModes.NO);
         return this;
     }
@@ -250,6 +274,16 @@ export class Document {
     }
 
     /**
+     * crop current document with provided rect
+     * @param rect
+     * @return Document
+     */
+    public crop(rect: Rect): Document {
+        app.activeDocument.crop([UnitValue(rect.x, 'px'), UnitValue(rect.y, 'px'), UnitValue(rect.right(), 'px'), UnitValue(rect.bottom(), 'px')]);
+        return this;
+    }
+
+    /**
      * export current file to local file with ExportOptionsSaveForWeb (png/jpg/gif...)
      * @param path
      * @param filename
@@ -287,6 +321,19 @@ export class Document {
         desc1.putEnumerated( app.stringIDToTypeID( "saveStage" ), app.stringIDToTypeID( "saveStageType" ), app.stringIDToTypeID( "saveSucceeded" ) );
         app.executeAction( app.charIDToTypeID( "save" ), desc1, DialogModes.NO );
         return this;
+    }
+
+    /**
+     * get current user selection， return null if none
+     * @return Rect | null
+     */
+    public selection(): Rect | null {
+        try {
+            const selection = app.activeDocument.selection.bounds;
+            return new Rect(selection[0].value, selection[1].value, selection[2].value - selection[0].value, selection[3].value - selection[1].value);
+        } catch (ex) {
+            return null;
+        }
     }
 
     /**

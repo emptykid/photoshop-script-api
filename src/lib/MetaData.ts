@@ -10,27 +10,36 @@ export class MetaData {
     }
 
     /**
+     * is XMP is available
+     * return bool
+     */
+    available(): boolean {
+        return typeof ExternalObject === 'function';
+    }
+
+    /**
      * 设置meta data
      * @param key
      * @param value
      */
     set(key: string, value: string): void {
-        // @ts-ignore
-        if (ExternalObject.AdobeXMPScript == undefined) {
-            // @ts-ignore
-            ExternalObject.AdobeXMPScript = new ExternalObject("lib:AdobeXMPScript");
-        }
-        let xmpObject;
+        let xmpObject = null;
         try {
+            // @ts-ignore
+            if (ExternalObject && ExternalObject.AdobeXMPScript == undefined) {
+                // @ts-ignore
+                ExternalObject.AdobeXMPScript = new ExternalObject("lib:AdobeXMPScript");
+            }
             const xmp = app.activeDocument.xmpMetadata.rawData;
             xmpObject = new XMPMeta(xmp);
         } catch (e) {
-            xmpObject = new XMPMeta();
         }
-        XMPMeta.registerNamespace(this.namespace, this.prefix);
-        xmpObject.deleteProperty(this.namespace, key);
-        xmpObject.setProperty(this.namespace, key, value);
-        app.activeDocument.xmpMetadata.rawData = xmpObject.serialize();
+        if (xmpObject != null) {
+            XMPMeta.registerNamespace(this.namespace, this.prefix);
+            xmpObject.deleteProperty(this.namespace, key);
+            xmpObject.setProperty(this.namespace, key, value);
+            app.activeDocument.xmpMetadata.rawData = xmpObject.serialize();
+        }
 
     }
 
@@ -39,18 +48,18 @@ export class MetaData {
      * @param key
      */
     get(key: string): string | null {
-        // @ts-ignore
-        if (ExternalObject.AdobeXMPScript == undefined) {
-            // @ts-ignore
-            ExternalObject.AdobeXMPScript = new ExternalObject("lib:AdobeXMPScript");
-        }
-        let xmp, xmpObject;
+        let xmp, xmpObject = null;
         try {
+            // @ts-ignore
+            if (ExternalObject && ExternalObject.AdobeXMPScript == undefined) {
+                // @ts-ignore
+                ExternalObject.AdobeXMPScript = new ExternalObject("lib:AdobeXMPScript");
+            }
             xmp = app.activeDocument.xmpMetadata.rawData;
             xmpObject = new XMPMeta(xmp);
         } catch (e) {
-            xmpObject = new XMPMeta();
         }
+        if (xmpObject === null) { return null }
         let value = null;
         try {
             XMPMeta.registerNamespace(this.namespace, this.prefix);
@@ -66,18 +75,18 @@ export class MetaData {
      * @param key
      */
     remove(key: string): void {
-        // @ts-ignore
-        if (ExternalObject.AdobeXMPScript == undefined) {
-            // @ts-ignore
-            ExternalObject.AdobeXMPScript = new ExternalObject("lib:AdobeXMPScript");
-        }
-        let xmpObject;
+        let xmpObject = null;
         try {
+            // @ts-ignore
+            if (ExternalObject.AdobeXMPScript == undefined) {
+                // @ts-ignore
+                ExternalObject.AdobeXMPScript = new ExternalObject("lib:AdobeXMPScript");
+            }
             const xmp = app.activeDocument.xmpMetadata.rawData;
             xmpObject = new XMPMeta(xmp);
         } catch (e) {
-            xmpObject = new XMPMeta();
         }
+        if (xmpObject === null) { return; }
         try {
             XMPMeta.registerNamespace(this.namespace, this.prefix);
             xmpObject.deleteProperty(this.namespace, key);
@@ -90,21 +99,17 @@ export class MetaData {
      * 清除所有medata数据
      */
     clear() {
-        // @ts-ignore
-        if (ExternalObject.AdobeXMPScript == undefined) {
-            // @ts-ignore
-            ExternalObject.AdobeXMPScript = new ExternalObject("lib:AdobeXMPScript");
-        }
+
         try {
+            // @ts-ignore
+            if (ExternalObject.AdobeXMPScript == undefined) {
+                // @ts-ignore
+                ExternalObject.AdobeXMPScript = new ExternalObject("lib:AdobeXMPScript");
+            }
             const xmp = new XMPMeta( app.activeDocument.xmpMetadata.rawData);
             // @ts-ignore
             xmp.deleteProperty(XMPConst.NS_PHOTOSHOP, "DocumentAncestors");
             app.activeDocument.xmpMetadata.rawData = xmp.serialize();
-            /*
-            const xmp = new XMPMeta(app.activeDocument.xmpMetadata.rawData);
-            XMPUtils.removeProperties(xmp, "", "", XMPConst.REMOVE_ALL_PROPERTIES);
-            app.activeDocument.xmpMetadata.rawData = xmp.serialize();
-             */
         } catch (e) {
         }
     }

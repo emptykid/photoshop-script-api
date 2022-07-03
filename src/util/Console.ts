@@ -11,6 +11,7 @@ export class Console {
             const ret = folder.create();
             if (ret === false) {
                 this.fire(`can not create folder[${folder.absoluteURI}]`);
+                alert(`can not create folder[${folder.absoluteURI}]`);
                 return;
             }
         }
@@ -29,11 +30,14 @@ export class Console {
 
     fire (message: string) {
         $.writeln(message);
-        // @ts-ignore
-        var eventObj = new CSXSEvent();
-        eventObj.type = "DevToolsConsoleEvent";
-        eventObj.data = '[DEBUG] [MSG: ' + message + ']';
-        eventObj.dispatch();
+        try {
+            // @ts-ignore
+            var eventObj = new CSXSEvent();
+            eventObj.type = "DevToolsConsoleEvent";
+            eventObj.data = '[DEBUG] [MSG: ' + message + ']';
+            eventObj.dispatch();
+        } catch (e) {
+        }
     }
 
     debug(message: string) {
@@ -49,12 +53,8 @@ export class Console {
     }
 
     error(message: string) {
+        this.fire(message);
         this.write(message, "ERROR");
-        // @ts-ignore
-        var eventObj = new CSXSEvent();
-        eventObj.type = "JSXErrorEvent";
-        eventObj.data = message;
-        eventObj.dispatch();
     }
 
     timer(action: string, mesage?: string) {

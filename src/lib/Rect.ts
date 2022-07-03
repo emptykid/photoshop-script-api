@@ -5,6 +5,8 @@
  */
 import {Size} from "./Size";
 
+export type RectItem = {x: number; y: number; width: number; height: number}
+
 export class Rect {
     x: number;
     y: number;
@@ -45,7 +47,7 @@ export class Rect {
         return `${this.x},${this.y} ${this.width}x${this.height}`;
     }
 
-    toJSON(): any {
+    toJSON(): RectItem {
         return {x: this.x, y: this.y, width: this.width, height: this.height};
     }
 

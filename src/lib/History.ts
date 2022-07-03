@@ -105,6 +105,15 @@ export class History {
     }
 
     /**
+     * set current history state
+     * @param state
+     */
+    public setState(state: HistoryState) {
+        //@ts-ignore
+        app.activeDocument.activeHistoryState = state;
+    }
+
+    /**
      * go to history with the name specified
      * notice! only the first one (from top to bottom) would be selected
      * @param name

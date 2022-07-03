@@ -172,6 +172,20 @@ export class Layer {
     }
 
     /**
+     * group selected layer
+     */
+    static groupSelected() {
+        const desc1 = new ActionDescriptor();
+        const ref1 = new ActionReference();
+        ref1.putClass(app.stringIDToTypeID("layerSection"));
+        desc1.putReference(app.stringIDToTypeID("null"), ref1);
+        const ref2 = new ActionReference();
+        ref2.putEnumerated(app.stringIDToTypeID("layer"), app.stringIDToTypeID("ordinal"), app.stringIDToTypeID("targetEnum"));
+        desc1.putReference(app.stringIDToTypeID("from"), ref2);
+        app.executeAction(app.stringIDToTypeID("make"), desc1, DialogModes.NO);
+    }
+
+    /**
      * get layer by given index
      * @param index 
      */
@@ -185,6 +199,23 @@ export class Layer {
         } catch (e) {
             return null;
         }
+    }
+
+    /**
+     * hide multiple layers by id list provided
+     * @param idList
+     */
+    static hideLayersByIDs(idList: number[]): void {
+        if (idList.length === 0) { return; }
+        const desc242 = new ActionDescriptor();
+        const list10 = new ActionList();
+        idList.forEach((layerId) => {
+            const current = new ActionReference();
+            current.putIdentifier(app.charIDToTypeID("Lyr "), layerId);
+            list10.putReference( current );
+        });
+        desc242.putList( app.charIDToTypeID( "null" ), list10 );
+        app.executeAction( app.charIDToTypeID( "Hd  " ), desc242, DialogModes.NO );
     }
 
 
@@ -227,8 +258,14 @@ export class Layer {
         }
     }
 
-    static hasArtboards(): boolean {
-        return this.getArtboardList().length > 0;
+    static hasArtboards(): number {
+        const theRef = new ActionReference();
+        theRef.putProperty(app.charIDToTypeID('Prpr'), app.stringIDToTypeID("artboards"));
+        theRef.putEnumerated(app.charIDToTypeID('Dcmn'), app.charIDToTypeID('Ordn'), app.charIDToTypeID('Trgt'));
+        const getDescriptor = new ActionDescriptor();
+        getDescriptor.putReference(app.stringIDToTypeID("null"), theRef);
+        const abDesc = app.executeAction(app.charIDToTypeID("getd"), getDescriptor, DialogModes.NO).getObjectValue(app.stringIDToTypeID("artboards"));
+        return abDesc.getList(app.stringIDToTypeID('list')).count;
     }
 
     static getArtboardList(): Layer[] {
@@ -265,6 +302,24 @@ export class Layer {
         backgroundReference.putEnumerated(app.charIDToTypeID("Lyr "), app.charIDToTypeID("Ordn"), app.charIDToTypeID("Back"));
         const backgroundDescriptor = app.executeActionGet(backgroundReference);
         return backgroundDescriptor.getBoolean(app.charIDToTypeID("Bckg"));
+    }
+
+    /**
+     * group selected layers and return the selected new group layer
+     * @return Layer
+     */
+    static groupSelectedLayers(): Layer {
+        const desc1 = new ActionDescriptor();
+        const ref1 = new ActionReference();
+        ref1.putClass( app.stringIDToTypeID( "layerSection" ) );
+        desc1.putReference( app.stringIDToTypeID( "null" ), ref1 );
+        const ref2 = new ActionReference();
+        ref2.putEnumerated( app.stringIDToTypeID( "layer" ), app.stringIDToTypeID( "ordinal" ), app.stringIDToTypeID( "targetEnum" ) );
+        desc1.putReference( app.stringIDToTypeID( "from" ), ref2 );
+        desc1.putString( app.stringIDToTypeID( "name" ), "New Group" ); // no effect
+        app.executeAction( app.stringIDToTypeID( "make" ), desc1, DialogModes.NO );
+        const layer = Layer.getSelectedLayer();
+        return layer;
     }
 
     name(): string {
@@ -536,6 +591,26 @@ export class Layer {
         }
     }
 
+    hasLayerEffects(): boolean {
+        let layerReference = new ActionReference();
+        layerReference.putIdentifier(app.charIDToTypeID("Lyr "), this.id);
+        let descriptor = app.executeActionGet(layerReference);
+        return descriptor.hasKey(app.stringIDToTypeID("layerEffects"));
+
+    }
+
+    layerFXVisible(): boolean {
+        let layerReference = new ActionReference();
+        layerReference.putIdentifier(app.charIDToTypeID("Lyr "), this.id);
+        let descriptor = app.executeActionGet(layerReference);
+        if (descriptor.hasKey(app.stringIDToTypeID("layerFXVisible"))) {
+            if (descriptor.getBoolean(app.stringIDToTypeID("layerFXVisible")) == true) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     toSelection(): Layer {
         const desc3 = new ActionDescriptor();
         const ref1 = new ActionReference();
@@ -558,6 +633,22 @@ export class Layer {
         desc7.putReference( app.charIDToTypeID( "null" ), ref4 );
         app.executeAction( app.stringIDToTypeID( "rasterizeLayer" ), desc7, DialogModes.NO );
         return this;
+    }
+
+    rasterizeStyle(): Layer {
+        const desc1 = new ActionDescriptor();
+        const ref1 = new ActionReference();
+        ref1.putIdentifier(app.charIDToTypeID("Lyr "), this.id);
+        desc1.putReference( app.stringIDToTypeID( "null" ), ref1 );
+        desc1.putEnumerated( app.stringIDToTypeID( "what" ), app.stringIDToTypeID( "rasterizeItem" ), app.stringIDToTypeID( "layerStyle" ) );
+        app.executeAction( app.stringIDToTypeID( "rasterizeLayer" ), desc1, DialogModes.NO );
+        return this;
+    }
+
+    mergeGroup(): Layer {
+        const idmergeLayersNew = app.stringIDToTypeID( "mergeLayersNew" );
+        app.executeAction( idmergeLayersNew, undefined, DialogModes.NO );
+        return new Layer(app.activeDocument.activeLayer.id);
     }
 
     setName(name: string): Layer {
@@ -586,19 +677,20 @@ export class Layer {
                 p.move(source, ElementPlacement.PLACEBEFORE);
                 //target.select();
             } else {
-                let index = target.index()-1;
-                this.select();
-                const desc9 = new ActionDescriptor();
-                const ref5 = new ActionReference();
-                ref5.putEnumerated(app.charIDToTypeID("Lyr "), app.charIDToTypeID("Ordn"), app.charIDToTypeID("Trgt"));
-                desc9.putReference(app.charIDToTypeID("null"), ref5);
-                const ref6 = new ActionReference();
-                ref6.putIndex(app.charIDToTypeID("Lyr "), index);
-                desc9.putReference(app.charIDToTypeID("T   "), ref6);
-                desc9.putBoolean(app.charIDToTypeID("Adjs"), false);
-                desc9.putInteger(app.charIDToTypeID("Vrsn"), 5);
-                app.executeAction(app.charIDToTypeID("move"), desc9, DialogModes.NO);
+
             }
+            let index = target.index()-1;
+            this.select();
+            const desc9 = new ActionDescriptor();
+            const ref5 = new ActionReference();
+            ref5.putEnumerated(app.charIDToTypeID("Lyr "), app.charIDToTypeID("Ordn"), app.charIDToTypeID("Trgt"));
+            desc9.putReference(app.charIDToTypeID("null"), ref5);
+            const ref6 = new ActionReference();
+            ref6.putIndex(app.charIDToTypeID("Lyr "), index);
+            desc9.putReference(app.charIDToTypeID("T   "), ref6);
+            desc9.putBoolean(app.charIDToTypeID("Adjs"), false);
+            desc9.putInteger(app.charIDToTypeID("Vrsn"), 5);
+            app.executeAction(app.charIDToTypeID("move"), desc9, DialogModes.NO);
         } catch (ex) {
         }
     }
@@ -684,5 +776,17 @@ export class Layer {
         desc1.putList(app.stringIDToTypeID("ID"), list1);
         app.executeAction(app.stringIDToTypeID("duplicate"), desc1, DialogModes.NO);
 
+    }
+
+    duplicateToDocument(name: string) {
+        const desc1 = new ActionDescriptor();
+        const ref1 = new ActionReference();
+        ref1.putEnumerated( app.stringIDToTypeID( "layer" ), app.stringIDToTypeID( "ordinal" ), app.stringIDToTypeID( "targetEnum" ) );
+        desc1.putReference( app.stringIDToTypeID( "null" ), ref1 );
+        const ref2 = new ActionReference();
+        ref2.putName( app.stringIDToTypeID( "document" ), name );
+        desc1.putReference( app.stringIDToTypeID( "to" ), ref2 );
+        desc1.putInteger( app.stringIDToTypeID( "version" ), 5 );
+        app.executeAction( app.stringIDToTypeID( "duplicate" ), desc1, DialogModes.NO );
     }
 }
