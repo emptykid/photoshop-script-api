@@ -530,9 +530,19 @@ export class Layer {
     }
 
     isLocked(): boolean {
-        this.select();
-        const layer = app.activeDocument.activeLayer;
-        return layer.allLocked;
+        const ref1 = new ActionReference();
+        ref1.putProperty(app.charIDToTypeID("Prpr"), app.stringIDToTypeID("layerLocking"));
+        ref1.putIdentifier(app.charIDToTypeID("Lyr "), this.id);
+        //ref1.putEnumerated(app.stringIDToTypeID("layer"), app.stringIDToTypeID("ordinal"), app.stringIDToTypeID("targetEnum"));
+        const descriptor = app.executeActionGet(ref1);
+        const layerLocking = descriptor.getObjectValue(app.stringIDToTypeID("layerLocking"));
+        const protectTransparency = layerLocking.getBoolean(app.stringIDToTypeID("protectTransparency"));
+        const protectComposite = layerLocking.getBoolean(app.stringIDToTypeID("protectComposite"));
+        const protectPosition = layerLocking.getBoolean(app.stringIDToTypeID("protectPosition"));
+        const protectArtboardAutonest = layerLocking.getBoolean(app.stringIDToTypeID("protectArtboardAutonest"));
+        const protectAll = layerLocking.getBoolean(app.stringIDToTypeID("protectAll"));
+
+        return  protectAll || protectPosition || protectComposite || protectTransparency || protectArtboardAutonest;
     }
 
     unlock(): Layer {

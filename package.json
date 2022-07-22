@@ -1,6 +1,6 @@
 {
   "name": "photoshop-script-api",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "photoshop script api 此项目旨在实现一套完整的API，用来封装photoshop插件开发过程中，宿主提供的能力合集。",
   "main": "index.jsx",
   "types": "index.d.ts",

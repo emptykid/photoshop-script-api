@@ -62,7 +62,7 @@ export class Console {
         mesage = (mesage)? mesage: "";
         if (this.actionList[action] === undefined) {
             this.actionList[action] = { t: now, }
-            this.info(`[${action}] start ${mesage}`);
+            //this.info(`[${action}] start ${mesage}`);
         } else {
             const item = this.actionList[action];
             const gap = now - item.t;

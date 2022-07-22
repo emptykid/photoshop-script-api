@@ -3,24 +3,21 @@ const path = require('path');
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 const JSXBinWebpackPlugin = require('jsxbin-webpack-plugin')
 
-
-const plugin_dir = "/Users/xiaoqiang/Projects/cutterman-cn/cutterman-photoshop-panel/src/panel/assets/jsx";
-//const plugin_dir = "/Users/xiaoqiang/Projects/cutterman-cn/psd-cleaner/src/panel/assets/jsx";
-//const plugin_dir = "/Users/xiaoqiang/Library/Application Support/Adobe/CEP/extensions/com.cutterman.cutterman.panel.unsigned/panel/assets/jsx";
-//const plugin_dir = "./dist";
+//const dist_dir = "/Users/xiaoqiang/Projects/cutterman-cn/cutterman-photoshop-panel/src/panel/assets/jsx/";
+//const dist_dir = "/Users/xiaoqiang/Projects/cutterman-cn/psd-cleaner/src/panel/assets/jsx";
 const dist_dir = "./dist";
 
 module.exports = (env, argv) => {
-    const output_dir = plugin_dir;
     return {
         mode: 'production',
-        target: ['web', 'es5'],
+        target: ['web', 'es3'],
         entry: {
-            app: './src/cutterman/Main.ts',
+            test: './src/Test.ts',
             /*
-            app: './src/PSDCleaner.ts',
-            index: './src/index.ts',
-            test: './src/Test.ts'
+            app: './src/cutterman/Panel.ts',
+            Cutterman: './src/cutterman/Shortcut.ts',
+            index: './src/index.ts'
+            app: './src/PSDCleaner.ts'
              */
         },
         resolve: {
@@ -33,19 +30,21 @@ module.exports = (env, argv) => {
         },
         optimization: {
             minimizer:  [
+                /*
                 new UglifyJsPlugin({
                     test: /\.js(\?.*)?$/i,
                     uglifyOptions: {
                         mangle: false,
                         compress: false,
                         output: {
-                            beautify: false,
+                            beautify: true,
                         },
                     }
                 }),
                 new JSXBinWebpackPlugin({
                     test: /\.js$/
                 })
+                 */
             ]
         },
         module: {
@@ -59,6 +58,6 @@ module.exports = (env, argv) => {
         ],
         output: {
             filename: '[name].js',
-            path: path.resolve(output_dir)
+            path: path.resolve(dist_dir),
         }
     }};
