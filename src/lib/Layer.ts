@@ -4,11 +4,16 @@
  * @description Layer implement for photoshop
  */
 
-import { Document } from "./Document";
-import { Rect } from "./Rect";
-import { DescriptorInfo } from "./DescriptorInfo";
-import { Color } from "./Color";
+import {Document} from "./Document";
+import {Rect} from "./Rect";
+import {DescriptorInfo} from "./DescriptorInfo";
 import {Size} from "./Size";
+import {Point} from "./Shape";
+import {SolidColor} from "./base/SolidColor";
+import {FXColorOverlay} from "./fx/FXColorOverlay";
+import {FXStroke} from "./fx/FXStroke";
+import {FXDropShadow} from "./fx/FXDropShadow";
+import {Text} from "./Text";
 
 const enum Kind {NORMAL = 1, TEXT = 3, VECTOR = 4};
 
@@ -159,9 +164,23 @@ export class Layer {
     }
 
     /**
+     * create a blank new layer
+     * @return Layer
+     */
+    static create(): Layer {
+        const desc1 = new ActionDescriptor();
+        const ref1 = new ActionReference();
+        ref1.putClass( app.stringIDToTypeID( "layer" ) );
+        desc1.putReference( app.stringIDToTypeID( "null" ), ref1 );
+        app.executeAction( app.stringIDToTypeID( "make" ), desc1, DialogModes.NO );
+        return Layer.getSelectedLayer();
+    }
+
+
+    /**
      * create a group layer
      * by default the created group is just above the top selected layer
-     * after created, the new layer is selected, you can retreive it by Layer.getSelectedLayers()
+     * after created, the new group layer is selected, you can retrieve it by Layer.getSelectedLayers()
      */
     static createGroup() {
         const desc1 = new ActionDescriptor();
@@ -258,14 +277,14 @@ export class Layer {
         }
     }
 
-    static hasArtboards(): number {
+    static hasArtboard(): boolean {
         const theRef = new ActionReference();
         theRef.putProperty(app.charIDToTypeID('Prpr'), app.stringIDToTypeID("artboards"));
         theRef.putEnumerated(app.charIDToTypeID('Dcmn'), app.charIDToTypeID('Ordn'), app.charIDToTypeID('Trgt'));
         const getDescriptor = new ActionDescriptor();
         getDescriptor.putReference(app.stringIDToTypeID("null"), theRef);
         const abDesc = app.executeAction(app.charIDToTypeID("getd"), getDescriptor, DialogModes.NO).getObjectValue(app.stringIDToTypeID("artboards"));
-        return abDesc.getList(app.stringIDToTypeID('list')).count;
+        return abDesc.getList(app.stringIDToTypeID('list')).count > 0;
     }
 
     static getArtboardList(): Layer[] {
@@ -318,8 +337,20 @@ export class Layer {
         desc1.putReference( app.stringIDToTypeID( "from" ), ref2 );
         desc1.putString( app.stringIDToTypeID( "name" ), "New Group" ); // no effect
         app.executeAction( app.stringIDToTypeID( "make" ), desc1, DialogModes.NO );
-        const layer = Layer.getSelectedLayer();
-        return layer;
+        return Layer.getSelectedLayer();
+    }
+
+    /**
+     * link target layers
+     * @param layers
+     */
+    public static linkLayers(layers: Layer[]): void {
+        Layer.setSelectedLayers(layers);
+        const desc11 = new ActionDescriptor();
+        const ref7 = new ActionReference();
+        ref7.putEnumerated( app.charIDToTypeID( "Lyr " ), app.charIDToTypeID( "Ordn" ), app.charIDToTypeID( "Trgt" ) );
+        desc11.putReference( app.charIDToTypeID( "null" ), ref7 );
+        app.executeAction( app.stringIDToTypeID( "linkSelectedLayers" ), desc11, DialogModes.NO );
     }
 
     name(): string {
@@ -342,16 +373,23 @@ export class Layer {
         }
     }
 
-    getParentId(): number {
-        try {
-            const layerReference = new ActionReference();
-            layerReference.putProperty(app.charIDToTypeID("Prpr"), app.stringIDToTypeID("parentLayerID"));
-            layerReference.putEnumerated(app.charIDToTypeID("Lyr "), app.charIDToTypeID("Ordn"), app.charIDToTypeID("Trgt"))
-            const descriptor = app.executeActionGet(layerReference);
-            return descriptor.getInteger(app.stringIDToTypeID("parentLayerID"));
-        } catch(e) {
-            return 0;
+    /**
+     * get parent layer of current
+     * @warning this layer only available on version upper than CC2018
+     * @return Layer
+     */
+    public parentLayer(): Layer | null {
+        const layerReference = new ActionReference();
+        layerReference.putProperty(app.charIDToTypeID("Prpr"), app.stringIDToTypeID("parentLayerID"));
+        layerReference.putEnumerated(app.charIDToTypeID("Lyr "), app.charIDToTypeID("Ordn"), app.charIDToTypeID("Trgt"))
+        const descriptor = app.executeActionGet(layerReference);
+        if (descriptor.hasKey(app.stringIDToTypeID("parentLayerID"))) {
+            const parentId = descriptor.getInteger(app.stringIDToTypeID("parentLayerID"));
+            if (parentId != -1) {
+                return new Layer(parentId);
+            }
         }
+        return null;
     }
 
 
@@ -394,16 +432,44 @@ export class Layer {
     // 适用于图层组的场景，确保当前图层已经被选中
     boundsActive(): Rect {
         const bounds = app.activeDocument.activeLayer.bounds;
-        const left = Math.round(bounds[0].as("px"));
-        const top = Math.round(bounds[1].as("px"));
-        const right = Math.round(bounds[2].as("px"));
-        const bottom = Math.round(bounds[3].as("px"));
+        const left = bounds[0].value;
+        const top = bounds[1].value;
+        const right = bounds[2].value;
+        const bottom = bounds[3].value;
         return new Rect(left, top, right - left, bottom - top);
     }
 
 
     size(): Size {
         return this.bounds().size();
+    }
+
+    radius(): number[] {
+        const layerReference = new ActionReference();
+        layerReference.putProperty(app.charIDToTypeID("Prpr"), app.stringIDToTypeID("keyOriginType"));
+        layerReference.putIdentifier(app.charIDToTypeID("Lyr "), this.id);
+        const layerDescriptor = app.executeActionGet(layerReference);
+        if (layerDescriptor.hasKey(app.stringIDToTypeID("keyOriginType"))) {
+            const list = layerDescriptor.getList(app.stringIDToTypeID("keyOriginType"));
+            const target = list.getObjectValue(0);
+            if (target.hasKey(app.stringIDToTypeID("keyOriginRRectRadii"))) {
+                const keyOriginRRectRadii = target.getObjectValue(app.stringIDToTypeID("keyOriginRRectRadii"));
+                const topRight = keyOriginRRectRadii.getInteger(app.stringIDToTypeID("topRight"));
+                const topLeft = keyOriginRRectRadii.getInteger(app.stringIDToTypeID("topLeft"));
+                const bottomLeft  = keyOriginRRectRadii.getInteger(app.stringIDToTypeID("bottomLeft"));
+                const bottomRight = keyOriginRRectRadii.getInteger(app.stringIDToTypeID("bottomRight"));
+                return [topLeft, topRight, bottomRight, bottomLeft];
+            }
+        }
+        return [];
+    }
+
+    opacity(): number {
+        const layerReference = new ActionReference();
+        layerReference.putProperty(app.charIDToTypeID("Prpr"), app.stringIDToTypeID("opacity"));
+        layerReference.putIdentifier(app.charIDToTypeID("Lyr "), this.id);
+        const layerDescriptor = app.executeActionGet(layerReference);
+        return layerDescriptor.getInteger(app.stringIDToTypeID("opacity"));
     }
 
     show(): Layer {
@@ -428,67 +494,37 @@ export class Layer {
         return this;
     }
 
+    rotate(angle: number, state: string = "QCSAverage", centerPoint: Point = null): Layer {
+        const descriptor = new ActionDescriptor();
+        const reference = new ActionReference();
+        reference.putEnumerated( app.stringIDToTypeID( "layer" ), app.stringIDToTypeID( "ordinal" ), app.stringIDToTypeID( "targetEnum" ));
+        descriptor.putReference( app.stringIDToTypeID( "null" ), reference );
+        descriptor.putEnumerated( app.stringIDToTypeID( "freeTransformCenterState" ), app.stringIDToTypeID( "quadCenterState" ), app.stringIDToTypeID( state )); // upper left
+        descriptor.putUnitDouble( app.stringIDToTypeID( "angle" ), app.stringIDToTypeID( "angleUnit" ), angle);
+        if (state === "QCSIndependent" && centerPoint != null) {
+            const desc2 = new ActionDescriptor();
+            desc2.putUnitDouble( app.charIDToTypeID( "Hrzn" ), app.charIDToTypeID( "#Rlt" ), centerPoint.x);
+            desc2.putUnitDouble( app.charIDToTypeID( "Vrtc" ), app.charIDToTypeID( "#Rlt" ), centerPoint.y);
+            descriptor.putObject( app.charIDToTypeID( "Pstn" ), app.charIDToTypeID( "Pnt " ), desc2 );
+        }
+        descriptor.putEnumerated( app.stringIDToTypeID( "interfaceIconFrameDimmed" ), app.stringIDToTypeID( "interpolationType" ), app.stringIDToTypeID( "bicubicSmoother" ));
+        app.executeAction( app.stringIDToTypeID( "transform" ), descriptor, DialogModes.NO );
+        return this;
+    }
+
     toString(): string {
         return `name[${this.name()}] id[${this.id}] index[${this.index()}]`;
     }
 
-    textInfo(): any {
-        if (!this.isTextLayer()) {
+    text(): Text | null {
+        const layerReference = new ActionReference();
+        layerReference.putIdentifier(app.charIDToTypeID("Lyr "), this.id);
+        const layerDescriptor = app.executeActionGet(layerReference);
+        if (!layerDescriptor.hasKey(app.stringIDToTypeID("textKey"))) {
             return null;
         }
-        this.select();
-        const result: any = {};
-        const ref = new ActionReference();
-        ref.putEnumerated(app.charIDToTypeID("Lyr "), app.charIDToTypeID("Ordn"), app.charIDToTypeID("Trgt"));
-        const desc = app.executeActionGet(ref);
-        const info: DescriptorInfo = new DescriptorInfo();
-        const ret = info.getProperties(desc, {});
-        if (ret.textKey) {
-            const textKey = ret.textKey;
-            result['orientation'] = textKey.orientation;
-            result['antiAlias'] = textKey.antiAlias;
-            result['bounds'] = Rect.fromLTRBBounds(textKey.bounds).toJSON();
-            result['boundingBox'] = Rect.fromLTRBBounds(textKey.boundingBox).toJSON();
-            result['content'] = textKey.textKey;
-            for (let i=0; i<textKey.textStyleRange.length; i++) {
-                const styleRange = textKey.textStyleRange[i];
-                if (styleRange.textStyleRange && styleRange.textStyleRange.textStyle) {
-                    const textStyle = styleRange.textStyleRange.textStyle;
-                    result['fontPostScriptName'] = textStyle.fontPostScriptName;
-                    result['fontName'] = textStyle.fontName;
-                    result['fontSzie'] = textStyle.size;
-                    result['bold'] = textStyle.syntheticBold;
-                    result['italic'] = textStyle.syntheticItalic;
-                    result['tracking'] = textStyle.tracking;
-                    result['baselineShift'] = textStyle.baselineShift;
-                    result['strikethrough'] = (textStyle.strikethrough && textStyle.strikethrough != 'strikethroughOff');
-                    result['underline'] = (textStyle.underline && textStyle.underline != 'underlineOff');
-                    result['color'] = new Color(textStyle.color.red, textStyle.color.grain, textStyle.color.blue).toHex();
-                    if (textKey.stroke) {
-                        result['stroke'] = {
-                            color: new Color(textStyle.strokeColor.red, textStyle.strokeColor.grain, textStyle.strokeColor.blue).toHex(),
-                            width: textStyle.lineWidth,
-                            lineCap: textStyle.lineCap,
-                            lineJoin: textStyle.lineJoin
-                        }
-                    }
-                    result['verticalScale'] = textStyle.verticalScale;
-                    result['horizontalScale'] = textStyle.horizontalScale;
-                    break;
-                }
-            }
-
-            if (textKey.paragraphStyleRange) {
-                for (let j = 0; j < textKey.paragraphStyleRange.length; j++) {
-                    const p = textKey.paragraphStyleRange[j];
-                    if (p.paragraphStyleRange && p.paragraphStyleRange.paragraphStyle) {
-                        result['align'] = p.paragraphStyleRange.paragraphStyle.align;
-                        break;
-                    }
-                }
-            }
-        }
-        return result;
+        const textKey = layerDescriptor.getObjectValue(app.stringIDToTypeID("textKey"));
+        return Text.fromDescriptor(textKey);
     }
 
     select(): Layer {
@@ -502,6 +538,12 @@ export class Layer {
         desc1.putList( app.stringIDToTypeID( "layerID" ), list1 );
         app.executeAction( app.stringIDToTypeID( "select" ), desc1, DialogModes.NO );
         return this;
+    }
+
+    toDescriptor(): ActionDescriptor {
+        const layerReference = new ActionReference();
+        layerReference.putIdentifier(app.charIDToTypeID("Lyr "), this.id);
+        return app.executeActionGet(layerReference);
     }
 
     visible(): boolean {
@@ -530,19 +572,9 @@ export class Layer {
     }
 
     isLocked(): boolean {
-        const ref1 = new ActionReference();
-        ref1.putProperty(app.charIDToTypeID("Prpr"), app.stringIDToTypeID("layerLocking"));
-        ref1.putIdentifier(app.charIDToTypeID("Lyr "), this.id);
-        //ref1.putEnumerated(app.stringIDToTypeID("layer"), app.stringIDToTypeID("ordinal"), app.stringIDToTypeID("targetEnum"));
-        const descriptor = app.executeActionGet(ref1);
-        const layerLocking = descriptor.getObjectValue(app.stringIDToTypeID("layerLocking"));
-        const protectTransparency = layerLocking.getBoolean(app.stringIDToTypeID("protectTransparency"));
-        const protectComposite = layerLocking.getBoolean(app.stringIDToTypeID("protectComposite"));
-        const protectPosition = layerLocking.getBoolean(app.stringIDToTypeID("protectPosition"));
-        const protectArtboardAutonest = layerLocking.getBoolean(app.stringIDToTypeID("protectArtboardAutonest"));
-        const protectAll = layerLocking.getBoolean(app.stringIDToTypeID("protectAll"));
-
-        return  protectAll || protectPosition || protectComposite || protectTransparency || protectArtboardAutonest;
+        this.select();
+        const layer = app.activeDocument.activeLayer;
+        return layer.allLocked;
     }
 
     unlock(): Layer {
@@ -605,8 +637,8 @@ export class Layer {
         let layerReference = new ActionReference();
         layerReference.putIdentifier(app.charIDToTypeID("Lyr "), this.id);
         let descriptor = app.executeActionGet(layerReference);
-        return descriptor.hasKey(app.stringIDToTypeID("layerEffects"));
-
+        const layerFXVisible = descriptor.getBoolean(app.stringIDToTypeID("layerFXVisible"));
+        return descriptor.hasKey(app.stringIDToTypeID("layerEffects")) && layerFXVisible;
     }
 
     layerFXVisible(): boolean {
@@ -619,6 +651,39 @@ export class Layer {
             }
         }
         return false;
+    }
+
+    getFXEffect(name: string): ActionDescriptor | null {
+        let layerReference = new ActionReference();
+        layerReference.putIdentifier(app.charIDToTypeID("Lyr "), this.id);
+        let descriptor = app.executeActionGet(layerReference);
+        const layerFXVisible = descriptor.getBoolean(app.stringIDToTypeID("layerFXVisible"));
+        if (layerFXVisible === false) {
+            return null;
+        }
+        if (!descriptor.hasKey(app.stringIDToTypeID("layerEffects"))) {
+            return null;
+        }
+        const layerEffects = descriptor.getObjectValue(app.stringIDToTypeID("layerEffects"));
+        if (!layerEffects.hasKey(app.stringIDToTypeID(name))) {
+            return null;
+        }
+        return layerEffects.getObjectValue(app.stringIDToTypeID(name));
+    }
+
+    getFxColorOverlay(): FXColorOverlay | null {
+        const solidFill = this.getFXEffect("solidFill");
+        return solidFill == null? null : FXColorOverlay.fromDescriptor(solidFill);
+    }
+
+    getFXStroke(): FXStroke | null {
+        const frameFX = this.getFXEffect("frameFX")
+        return frameFX === null? null : FXStroke.fromDescriptor(frameFX);
+    }
+
+    getFXDropShadow(): FXDropShadow | null {
+        const dropShadow = this.getFXEffect("dropShadow")
+        return dropShadow === null? null : FXDropShadow.fromDescriptor(dropShadow);
     }
 
     toSelection(): Layer {
@@ -738,6 +803,23 @@ export class Layer {
         return this;
     }
 
+    getFillColor(): SolidColor | null {
+        if (!this.isShapeLayer()) {
+            return null;
+        }
+        const layerReference = new ActionReference();
+        //layerReference.putProperty(app.charIDToTypeID("Prpr"), app.stringIDToTypeID("fillEnabled"));
+        layerReference.putProperty(app.charIDToTypeID("Prpr"), app.stringIDToTypeID("adjustment"));
+        layerReference.putIdentifier(app.charIDToTypeID("Lyr "), this.id);
+        const descriptor = app.executeActionGet(layerReference);
+        if (descriptor.hasKey(app.stringIDToTypeID("adjustment"))) {
+            const list =  descriptor.getList( app.stringIDToTypeID( "adjustment" ) ) ;
+            const solidColorLayer = list.getObjectValue(0);
+            const rgbColor = solidColorLayer.getObjectValue(app.charIDToTypeID("Clr "));
+            return SolidColor.fromDescriptor(rgbColor);
+        }
+        return null;
+    }
 
     setFillOpacity(opacity: number): Layer {
         const desc1 = new ActionDescriptor();

@@ -50,6 +50,7 @@ export class Application {
 
     /**
      * get current application host version
+     * currently support CC2015 - CC2022
      * @return HostVersion
      */
     public getHostVersion(): HostVersion {

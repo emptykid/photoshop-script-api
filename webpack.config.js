@@ -3,8 +3,6 @@ const path = require('path');
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 const JSXBinWebpackPlugin = require('jsxbin-webpack-plugin')
 
-//const dist_dir = "/Users/xiaoqiang/Projects/cutterman-cn/cutterman-photoshop-panel/src/panel/assets/jsx/";
-//const dist_dir = "/Users/xiaoqiang/Projects/cutterman-cn/psd-cleaner/src/panel/assets/jsx";
 const dist_dir = "./dist";
 
 module.exports = (env, argv) => {
@@ -12,13 +10,8 @@ module.exports = (env, argv) => {
         mode: 'production',
         target: ['web', 'es3'],
         entry: {
-            test: './src/Test.ts',
-            /*
-            app: './src/cutterman/Panel.ts',
-            Cutterman: './src/cutterman/Shortcut.ts',
-            index: './src/index.ts'
-            app: './src/PSDCleaner.ts'
-             */
+            index: './src/index.ts',
+            main: './src/main.ts',
         },
         resolve: {
             extensions: ['.js', '.ts', '.json'],
@@ -30,7 +23,6 @@ module.exports = (env, argv) => {
         },
         optimization: {
             minimizer:  [
-                /*
                 new UglifyJsPlugin({
                     test: /\.js(\?.*)?$/i,
                     uglifyOptions: {
@@ -41,6 +33,7 @@ module.exports = (env, argv) => {
                         },
                     }
                 }),
+                /*
                 new JSXBinWebpackPlugin({
                     test: /\.js$/
                 })

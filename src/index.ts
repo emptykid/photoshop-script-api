@@ -6,10 +6,25 @@
 
 /// <reference types="ps-extendscript-types"/>
 
+// base
+export {SolidColor} from "./lib/base/SolidColor";
+export {GradientColor} from "./lib/base/GradientColor";
+
+// fx
+export {FXColorOverlay} from "./lib/fx/FXColorOverlay";
+export {FXDropShadow} from "./lib/fx/FXDropShadow";
+export {FXStroke} from "./lib/fx/FXStroke";
+
+// tool
+export {MoveTool} from "./lib/tool/MoveTool";
+export {RulerTool} from "./lib/tool/RulerTool";
+
 export {Application, HostVersion } from "./lib/Application";
 export {Artboard } from "./lib/Artboard";
-export {Color} from "./lib/Color";
+export {Canvas} from "./lib/Canvas";
+export {ColorSampler} from "./lib/ColorSampler";
 export {Document} from "./lib/Document";
+export {Guide} from "./lib/Guide";
 export {History} from "./lib/History";
 export {Layer} from "./lib/Layer";
 export {MetaData} from "./lib/MetaData";
@@ -18,50 +33,6 @@ export {Selection} from "./lib/Selection";
 export {Shape} from "./lib/Shape";
 export {Size} from "./lib/Size";
 export {Stroke, StrokeLineType} from "./lib/Stroke";
-
-export {Response} from "./util/Response";
+export {Text} from "./lib/Text";
 export {Rectangle} from "./lib/Shape";
-export {Console} from "./util/Console";
-export {Utils} from "./util/Utils";
-export {Kind} from "./util/Constants";
-
-/*
-import {Application as _Application} from "./lib/Application";
-import {Artboard as _Artboard} from "./lib/Artboard";
-import {Color as _Color} from "./lib/Color";
-import {Document as _Document} from "./lib/Document";
-import {History as _History} from "./lib/History";
-import {Layer as _Layer} from "./lib/Layer";
-import {MetaData as _MetaData} from "./lib/MetaData";
-import {Rect as _Rect} from "./lib/Rect";
-import {Selection as _Selection} from "./lib/Selection";
-import {Shape as _Shape} from "./lib/Shape";
-import {Size as _Size} from "./lib/Size";
-import {Stroke as _Stroke} from "./lib/Stroke";
-
-// @ts-ignore
-Application = _Application;
-// @ts-ignore
-Artboard = _Artboard;
-// @ts-ignore
-Color = _Color;
-// @ts-ignore
-Document = _Document;
-// @ts-ignore
-History = _History;
-// @ts-ignore
-Layer = _Layer;
-// @ts-ignore
-MetaData = _MetaData;
-// @ts-ignore
-Rect = _Rect;
-// @ts-ignore
-Selection = _Selection;
-// @ts-ignore
-Shape = _Shape;
-// @ts-ignore
-Size = _Size;
-// @ts-ignore
-Stroke = _Stroke;
-
- */
+export {Utils} from "./lib/Utils";

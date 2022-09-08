@@ -4,10 +4,10 @@
  * @description Document represent a document file object
  */
 
-import { Rect } from "./Rect";
-import { Selection } from "./Selection";
+import {Rect} from "./Rect";
 import {Size} from "./Size";
-import {Layer} from "./Layer";
+import {UnitType} from "./Shape";
+import {ColorSampler} from "./ColorSampler";
 
 export class Document {
 
@@ -143,6 +143,18 @@ export class Document {
     }
 
     /**
+     * get current document resolution
+     * @return number
+     */
+    public resolution(): number {
+        const ref = new ActionReference();
+        ref.putProperty(app.charIDToTypeID("Prpr"), app.stringIDToTypeID("resolution"));
+        ref.putEnumerated(app.charIDToTypeID('Dcmn'), app.charIDToTypeID('Ordn'), app.charIDToTypeID('Trgt'));
+        const descriptor = app.executeActionGet(ref);
+        return descriptor.getInteger(app.stringIDToTypeID("resolution"));
+    }
+
+    /**
      * resize current document image, equal to action: menu -> Image -> Image Size
      * @param size
      */
@@ -251,7 +263,7 @@ export class Document {
      * get current document action descriptor
      * @return ActionDescriptor
      */
-    public getDescriptor(): ActionDescriptor {
+    public toDescriptor(): ActionDescriptor {
         const documentReference = new ActionReference();
         documentReference.putEnumerated(app.stringIDToTypeID("document"), app.charIDToTypeID("Ordn"), app.charIDToTypeID("Trgt"));
         return app.executeActionGet(documentReference);
@@ -337,6 +349,19 @@ export class Document {
     }
 
     /**
+     * create a selection with provided rect
+     * @param rect
+     */
+    public setSelection(rect: Rect): void {
+        const desc1 = new ActionDescriptor();
+        const ref1 = new ActionReference();
+        ref1.putProperty( app.stringIDToTypeID( "channel" ), app.stringIDToTypeID( "selection" ) );
+        desc1.putReference( app.stringIDToTypeID( "null" ), ref1 );
+        desc1.putObject( app.stringIDToTypeID( "to" ), app.stringIDToTypeID( "rectangle" ), rect.toDescriptor(UnitType.Distance) );
+        app.executeAction( app.stringIDToTypeID( "set" ), desc1, DialogModes.NO );
+    }
+
+    /**
      * get current file size in bytes
      * @return number
      */
@@ -351,4 +376,25 @@ export class Document {
             return 0;
         }
     }
+
+    /**
+     * get current color sampler list in document
+     * @return ColorSampler[]
+     */
+    public colorSamplerList(): ColorSampler[] {
+        const documentReference = new ActionReference();
+        documentReference.putEnumerated(app.charIDToTypeID("Dcmn"), app.charIDToTypeID("Ordn"), app.charIDToTypeID("Trgt"));
+        const documentDescriptor = app.executeActionGet(documentReference);
+        const ret: ColorSampler[] = [];
+        if (documentDescriptor.hasKey(app.stringIDToTypeID("colorSamplerList"))) {
+            const colorSamplerList = documentDescriptor.getList(app.stringIDToTypeID("colorSamplerList"));
+            for (let i=0; i<colorSamplerList.count; i++) {
+                const colorSamplerDesc = colorSamplerList.getObjectValue(i);
+                ret.push(ColorSampler.fromDescriptor(colorSamplerDesc));
+            }
+        }
+
+        return ret;
+    }
+
 }

@@ -6,13 +6,17 @@
 import {Rect} from "./Rect";
 
 export class Selection  {
-    bounds: Rect;
+    private bounds: Rect;
 
     constructor(rect: Rect) {
         this.bounds = rect;
     }
 
-    static get(): Selection | null {
+    /**
+     * get current selection, return null if there is none
+     * @return Selection | null
+     */
+    public static get(): Selection | null {
         try {
             const selection = app.activeDocument.selection.bounds;
             const rect = new Rect(selection[0].value, selection[1].value, selection[2].value - selection[0].value, selection[3].value - selection[1].value);
@@ -22,7 +26,27 @@ export class Selection  {
         }
     }
 
-    create(): Selection {
+    /**
+     * make selection from current selected layer
+     * @return Selection
+     */
+    public static fromLayer(): Selection {
+        const desc1 = new ActionDescriptor();
+        const ref1 = new ActionReference();
+        ref1.putProperty( app.stringIDToTypeID( "channel" ), app.stringIDToTypeID( "selection" ) );
+        desc1.putReference( app.stringIDToTypeID( "null" ), ref1 );
+        const ref2 = new ActionReference();
+        ref2.putEnumerated( app.stringIDToTypeID( "channel" ), app.stringIDToTypeID( "channel" ), app.stringIDToTypeID( "transparencyEnum" ) );
+        desc1.putReference( app.stringIDToTypeID( "to" ), ref2 );
+        app.executeAction( app.stringIDToTypeID( "set" ), desc1, DialogModes.NO );
+        return this.get();
+    }
+
+    /**
+     * create a selection area in PS with current rect
+     * @return Selection
+     */
+    public create(): Selection {
         const selectionMode = app.charIDToTypeID("setd");
         const selectionDescriptor = new ActionDescriptor();
         const selectionReference = new ActionReference();
@@ -33,7 +57,11 @@ export class Selection  {
         return this;
     }
 
-    deselect(): void {
+    /**
+     * deselect current selection
+     * @return void
+     */
+    public deselect(): void {
         const selectionDescriptor = new ActionDescriptor();
         const selectionReference = new ActionReference();
         selectionReference.putProperty(app.charIDToTypeID("Chnl"), app.charIDToTypeID("fsel"));
@@ -42,9 +70,28 @@ export class Selection  {
         app.executeAction(app.charIDToTypeID("setd"), selectionDescriptor, DialogModes.NO);
     }
 
-    invert(): void {
-        const idInvs = app.charIDToTypeID( "Invs" );
-        app.executeAction( idInvs, undefined, DialogModes.NO );
+    /**
+     * invert selection area
+     * @return void
+     */
+    public invert(): void {
+        app.executeAction( app.charIDToTypeID( "Invs" ), undefined, DialogModes.NO );
+    }
+
+    /**
+     * convert current selection to path
+     * @return void
+     */
+    public toPath(tolerance: number = 2): void {
+        const desc1 = new ActionDescriptor();
+        const ref1 = new ActionReference();
+        ref1.putClass( app.stringIDToTypeID( "path" ) );
+        desc1.putReference( app.stringIDToTypeID( "null" ), ref1 );
+        const ref2 = new ActionReference();
+        ref2.putProperty( app.stringIDToTypeID( "selectionClass" ), app.stringIDToTypeID( "selection" ) );
+        desc1.putReference( app.stringIDToTypeID( "from" ), ref2 );
+        desc1.putUnitDouble( app.stringIDToTypeID( "tolerance" ), app.stringIDToTypeID( "pixelsUnit" ),tolerance);
+        app.executeAction( app.stringIDToTypeID( "make" ), desc1, DialogModes.NO );
     }
 
 }
