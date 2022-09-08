@@ -36,3 +36,4 @@ export {Stroke, StrokeLineType} from "./lib/Stroke";
 export {Text} from "./lib/Text";
 export {Rectangle} from "./lib/Shape";
 export {Utils} from "./lib/Utils";
+
