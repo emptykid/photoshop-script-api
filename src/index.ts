@@ -30,10 +30,9 @@ export {Layer} from "./lib/Layer";
 export {MetaData} from "./lib/MetaData";
 export {Rect} from "./lib/Rect";
 export {Selection} from "./lib/Selection";
-export {Shape} from "./lib/Shape";
+export {Shape, Point, Line, Circle, Ellipse, Triangle, Rectangle, UnitType} from "./lib/Shape";
 export {Size} from "./lib/Size";
 export {Stroke, StrokeLineType} from "./lib/Stroke";
 export {Text} from "./lib/Text";
-export {Rectangle} from "./lib/Shape";
 export {Utils} from "./lib/Utils";
 

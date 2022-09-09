@@ -23,9 +23,9 @@ npm install photoshop-script-api
 include the **index.jsx** file in your code
 
 ```javascript
-#include "./node_modules/photoshop-script-api/dist/index.jsx"
+#include "./node_modules/photoshop-script-api/dist/main.js"
 
-var a = new Application();
+var a = new $.Application();
 alert(a.version());
 ```
 
@@ -34,7 +34,7 @@ alert(a.version());
 
 ### Classes
 
-This module includes some Classes as below
+This module includes some Classes listed below
 
 1. Application
 2. Document
@@ -52,13 +52,19 @@ This module includes some Classes as below
 
 more will be adding in future
 
+in order to avoid namespace conflict, all class names are prefixed with "$", so you can use them like this
+
+```javascript
+var app = new $.Application();
+```
+
 each Class offers some useful api to make things happen, you can check out the code to get more detail.
 
 ### Application
 
 ```javascript
 // open a file
-var theApp = new Application();
+var theApp = new $.Application();
 theApp.open("/path/to/a/file");
 ```
 
@@ -66,7 +72,7 @@ theApp.open("/path/to/a/file");
 
 ```javascript
 // get current active document
-var doc = Document.activeDocument();
+var doc = $.Document.activeDocument();
 if (doc == null) {
     alert("no doucment opened");
     return;
@@ -81,14 +87,14 @@ doc.trim(); // trim document transparent area
 ```javascript
 
 // get selected layers
-var layers = Layer.getSelectedLayers();
+var layers = $.Layer.getSelectedLayers();
 for (var i=0; i<layers.length; i++) {
     var layer = layers[i];
     $.writeln(layer.name());    // layer name
     $.writeln(layer.index());    // layer index
 }
 
-var layer = Layer.getLayerByIndex(10);
+var layer = $.Layer.getLayerByIndex(10);
 layer.setName('an awesome name');   // set a new name for layer
 var bounds = layer.getBounds();   // get the postion & size of the layer
 var size = bounds.size();
@@ -109,15 +115,35 @@ layer.selct().toSelection().hide();
 
 ```javascript
 // create a selection
-var bounds = new Rect(100, 100, 100, 100);
-var selection = new Selection(bounds);
+var bounds = new $.Rect(100, 100, 100, 100);
+var selection = new $.Selection(bounds);
 selection.create();
 ```
 
 ### Canvas
 
-// TODO
 Canvas makes easy to draw shapes in document
+
+```javascript
+// we create a canvas to hold shapes
+var canvas = new $.Canvas();
+
+// create a circle
+var circle = new $.Circle(new Point(100, 100), 50);
+// create a rectangle
+var rect = new $.Rect(100, 100, 100, 100);
+// create a line
+var line = new $.Line(new Point(100, 100), new Point(200, 200));
+// add shappe to canvas
+canvas.add(circle);
+canvas.add(rect);
+canvas.add(line);
+
+// we set the color of the shape
+canvas.setFillColor($.SolidColor.fromHexString("#ff5c5c"));
+// we paint
+canvas.paint();
+```
 
 ## About Me
 
