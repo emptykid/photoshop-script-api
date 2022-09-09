@@ -38,10 +38,15 @@ export class FXDropShadow {
         ins.localLightingAngle = desc.getDouble(app.stringIDToTypeID("localLightingAngle"));
         ins.chokeMatte = desc.getDouble(app.stringIDToTypeID("chokeMatte"));
         ins.blur = desc.getDouble(app.stringIDToTypeID("blur"));
+        ins.distance = desc.getDouble(app.stringIDToTypeID("distance"));
         ins.noise = desc.getDouble(app.stringIDToTypeID("noise"));
         ins.antiAlias  = desc.getBoolean(app.stringIDToTypeID("antiAlias"));
 
         return ins;
+    }
+
+    public toString(): string {
+        return `${this.color.toHex()}  ${this.distance}px ${this.blur}px ${this.chokeMatte}% (${this.localLightingAngle}') ${this.opacity}%`;
     }
 
 

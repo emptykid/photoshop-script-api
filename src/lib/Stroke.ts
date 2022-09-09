@@ -71,6 +71,7 @@ export class Stroke {
         const ins = new Stroke(lineWidth, lineType, SolidColor.fromDescriptor(colorDesc));
         ins.strokeEnabled = desc.getBoolean(app.stringIDToTypeID("strokeEnabled"));
         ins.fillEnabled = desc.getBoolean(app.stringIDToTypeID("fillEnabled"));
+        ins.opacity = desc.getDouble(app.stringIDToTypeID("strokeStyleOpacity"));
         ins.resolution = desc.getDouble(app.stringIDToTypeID("strokeStyleResolution"));
         ins.lineCapType = strokeStyleLineCapType as StrokeStyleLineCapType;
         ins.lineAlignment = strokeStyleLineAlignment as StrokeStyleLineAlignment;
@@ -78,8 +79,8 @@ export class Stroke {
         return ins;
     }
 
-    toString(): string {
-        return `${this.width} ${this.color.toHex()}`;
+    public toString(): string {
+        return `${this.width} ${this.opacity}% ${this.color.toHex()}`;
     }
 
     toDescriptor(): ActionDescriptor {

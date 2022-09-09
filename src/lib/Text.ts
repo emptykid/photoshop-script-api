@@ -8,13 +8,8 @@ import {Rect} from "./Rect";
 import {Point, UnitType} from "./Shape";
 import {Document} from "./Document";
 import {Stroke} from "./Stroke";
+import {FontFormat} from "./base/Includes";
 import {SolidColor} from "./base/SolidColor";
-
-export type FontFormat = {
-    name: string;
-    style: string;
-    scriptName: string;
-}
 
 export enum TextAntiAliasType {
     None = "antiAliasNone",
@@ -106,6 +101,9 @@ export class Text {
     }
 
     public size(): number {
+        if (this.styleDesc.hasKey(app.stringIDToTypeID("impliedFontSize"))) {
+            return this.styleDesc.getDouble(app.stringIDToTypeID("impliedFontSize"));
+        }
         return this.styleDesc.getDouble(app.stringIDToTypeID("size"));
     }
 
@@ -126,11 +124,16 @@ export class Text {
     }
 
     public lineHeight(): number {
-        const autoLeading = this.styleDesc.getBoolean(app.stringIDToTypeID("autoLeading"));
-        if (autoLeading) {
-            return -1;
+        if (this.styleDesc.hasKey(app.stringIDToTypeID("autoLeading"))) {
+            const autoLeading = this.styleDesc.getBoolean(app.stringIDToTypeID("autoLeading"));
+            if (autoLeading) {
+                return -1;
+            }
         }
-        return this.styleDesc.getDouble(app.stringIDToTypeID("leading"));
+        if (this.styleDesc.hasKey(app.stringIDToTypeID("leading"))) {
+            return this.styleDesc.getDouble(app.stringIDToTypeID("leading"));
+        }
+        return -1;
     }
 
     public strikethrough(): TextStrikeThroughType {
@@ -216,6 +219,12 @@ export class Text {
 
     public setAutoLeading(leading: boolean): Text {
         this.styleDesc.putBoolean( app.stringIDToTypeID( "autoLeading" ), leading );
+        return this;
+    }
+
+    public setLineHeight(lineHeight: number): Text {
+        this.styleDesc.putBoolean( app.stringIDToTypeID( "autoLeading" ), false);
+        this.styleDesc.putDouble( app.stringIDToTypeID( "leading" ), lineHeight );
         return this;
     }
 

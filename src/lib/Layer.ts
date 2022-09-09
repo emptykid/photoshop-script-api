@@ -14,6 +14,7 @@ import {FXColorOverlay} from "./fx/FXColorOverlay";
 import {FXStroke} from "./fx/FXStroke";
 import {FXDropShadow} from "./fx/FXDropShadow";
 import {Text} from "./Text";
+import {FXGradientFill} from "./fx/FXGradientFill";
 
 const enum Kind {NORMAL = 1, TEXT = 3, VECTOR = 4};
 
@@ -684,6 +685,11 @@ export class Layer {
     getFXDropShadow(): FXDropShadow | null {
         const dropShadow = this.getFXEffect("dropShadow")
         return dropShadow === null? null : FXDropShadow.fromDescriptor(dropShadow);
+    }
+
+    getFXGradientFill(): FXGradientFill | null {
+        const gradientFill = this.getFXEffect("gradientFill");
+        return gradientFill === null? null : FXGradientFill.fromDescriptor(gradientFill);
     }
 
     toSelection(): Layer {

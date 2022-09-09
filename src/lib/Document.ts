@@ -337,12 +337,13 @@ export class Document {
 
     /**
      * get current user selection， return null if none
+     * @param unit
      * @return Rect | null
      */
-    public selection(): Rect | null {
+    public selection(unit: _ScaleUnit = 'px'): Rect | null {
         try {
             const selection = app.activeDocument.selection.bounds;
-            return new Rect(selection[0].value, selection[1].value, selection[2].value - selection[0].value, selection[3].value - selection[1].value);
+            return new Rect(selection[0].as(unit), selection[1].as(unit), selection[2].as(unit) - selection[0].as(unit), selection[3].as(unit) - selection[1].as(unit));
         } catch (ex) {
             return null;
         }
@@ -357,7 +358,7 @@ export class Document {
         const ref1 = new ActionReference();
         ref1.putProperty( app.stringIDToTypeID( "channel" ), app.stringIDToTypeID( "selection" ) );
         desc1.putReference( app.stringIDToTypeID( "null" ), ref1 );
-        desc1.putObject( app.stringIDToTypeID( "to" ), app.stringIDToTypeID( "rectangle" ), rect.toDescriptor(UnitType.Distance) );
+        desc1.putObject( app.stringIDToTypeID( "to" ), app.stringIDToTypeID( "rectangle" ), rect.toDescriptor(UnitType.Pixel) );
         app.executeAction( app.stringIDToTypeID( "set" ), desc1, DialogModes.NO );
     }
 
