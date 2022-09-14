@@ -12,6 +12,19 @@ This project wraps the AM codes and build a friendly use js api to offer powerfu
 
 This project is written in [TypeScript](http://www.typescriptlang.org). If you use ts in your codes, just clone this project and import the source code as you want.
 
+### Typescript
+
+import the index.ts file in your project
+
+```typescript
+import { Document } from "./photoshop-script-api/src/index";
+
+const doc = new Document();
+$.writeln(doc.name());
+```
+
+### Javascript
+
 In plain javascript way, you can install the npm module which has been compiled and published.
 
 install the module from npm 
@@ -20,7 +33,7 @@ install the module from npm
 npm install photoshop-script-api
 ```
 
-include the **index.jsx** file in your code
+include the **main.js** file in your code
 
 ```javascript
 #include "./node_modules/photoshop-script-api/dist/main.js"
