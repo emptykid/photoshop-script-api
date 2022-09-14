@@ -214,6 +214,19 @@ other classes are similar to use, you can check out the code to get more detail.
 
 if any questions, please post an issue.
 
+## change logs
+
+**2022-09-14**
+> photoshop-script-api@1.0.4
+
+1. add Canvas class
+2. add Guide class
+3. add Text class
+4. add fx modules with ColorOverlay, DropShadow, GradientFill and Stroke
+5. add two tools (Move, Ruler)
+6. change Color to SolidColor
+7. add GradientColor support
+
 ## About Me
 
 Ten years Software Engineer from China, former Senior Engineer of Baidu Inc. Head in web, mobile, media development, in love with design. Have several welcome products for designers in China.

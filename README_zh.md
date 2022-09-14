@@ -11,6 +11,20 @@ DOM的接口清晰易于理解使用，但是功能很少很弱，相比较AD的
 
 这个项目是用[TypeScript](http://www.typescriptlang.org)写的，如果你了解TS并也正在使用它，你可以直接克隆此项目到你的工程中，然后直接引入对应的文件即可。
 
+### Typescript
+
+在你的工程中导入 index.ts 
+
+```typescript
+import { Document } from "./photoshop-script-api/src/index";
+
+const doc = new Document();
+$.writeln(doc.name());
+```
+
+
+### Javascript
+
 如果你使用的原生的javascript做开发，可以使用已经发布的npm包，它已经被编译成了es3代码，可以直接使用
 
 ```shell
@@ -198,6 +212,17 @@ History.restoreState();
 如有遇到问题，请提issue，或者加入微信群交流：
 
 ![微信群](https://blog.cutterman.cn/assets/img/wx-group.jpg)
+
+## 更新日志
+
+**2022-09-14**
+> photoshop-script-api@1.0.4
+
+1. 添加Canvas, Guide, Text模块
+2. 添加图层效果 ColorOverlay, DropShadow, GradientFill and Stroke
+3. 添加了两个工具 (Move, Ruler)
+4. 修改 Color 为 SolidColor
+5. 添加了 GradientColor 支持
 
 ## 关于作者
 业余独立开发者，前百度资深高级工程师，熟悉软件工程，熟悉web、移动端、多媒体开发技术，热爱设计。业余开发过多款设计相关的产品，产品拥有几十万的设计师用户。下面是对应产品的网站：
