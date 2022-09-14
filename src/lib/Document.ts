@@ -218,6 +218,24 @@ export class Document {
         return this;
     }
 
+    /**
+     * save a copy of current file
+     * @param filePath
+     * @param saveAsCopy
+     */
+    public saveAs(filePath: string, saveAsCopy: boolean = false) {
+        const desc1 = new ActionDescriptor();
+        const desc2 = new ActionDescriptor();
+        desc2.putBoolean( app.stringIDToTypeID( "maximizeCompatibility" ), true );
+        desc1.putObject( app.stringIDToTypeID( "as" ), app.stringIDToTypeID( "photoshop35Format" ), desc2 );
+        //@ts-ignore
+        desc1.putPath( app.stringIDToTypeID( "in" ), new File( filePath ) );
+        desc1.putInteger( app.stringIDToTypeID( "documentID" ), this.id);
+        desc1.putBoolean( app.stringIDToTypeID( "copy" ), saveAsCopy );
+        desc1.putBoolean( app.stringIDToTypeID( "lowerCase" ), true );
+        app.executeAction( app.stringIDToTypeID( "save" ), desc1, DialogModes.NO );
+    }
+
 
     /**
      * return current document info in json format

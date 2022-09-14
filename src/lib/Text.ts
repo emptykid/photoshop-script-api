@@ -38,6 +38,7 @@ export class Text {
     public descriptorType: number = app.stringIDToTypeID( "textLayer" );
     public readonly textDesc: ActionDescriptor;
     public readonly styleDesc: ActionDescriptor;
+    private readonly styleRangeCount: number = 1;
 
     constructor(content: string, desc: ActionDescriptor = null)  {
         this.content = content;
@@ -45,6 +46,7 @@ export class Text {
         if (desc != null) {
             this.textDesc = desc;
             const textStyleRanges = desc.getList(app.stringIDToTypeID("textStyleRange"));
+            this.styleRangeCount = textStyleRanges.count;
             const textStyleRange = textStyleRanges.getObjectValue(0);
             this.styleDesc = textStyleRange.getObjectValue(app.stringIDToTypeID("textStyle"));
         } else {
@@ -147,6 +149,17 @@ export class Text {
 
     public color(): SolidColor {
         return SolidColor.fromDescriptor(this.styleDesc.getObjectValue(app.stringIDToTypeID("color")));
+    }
+
+    public colorList(): SolidColor[] {
+        const colors: SolidColor[] = [];
+        const textStyleRanges = this.textDesc.getList(app.stringIDToTypeID("textStyleRange"));
+        for (let i=0; i<textStyleRanges.count; i++) {
+            const textStyleRange = textStyleRanges.getObjectValue(i);
+            const styleDesc = textStyleRange.getObjectValue(app.stringIDToTypeID("textStyle"));
+            colors.push(SolidColor.fromDescriptor(styleDesc.getObjectValue(app.stringIDToTypeID("color"))));
+        }
+        return colors;
     }
 
     public paragraphCount(): number {
