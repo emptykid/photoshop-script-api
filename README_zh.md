@@ -20,17 +20,18 @@ npm install photoshop-script-api
 在你的ExtendScript代码中，直接引入对应的文件即可
 
 ```javascript
-#include "./node_modules/photoshop-script-api/dist/index.jsx"
+#include "./node_modules/photoshop-script-api/dist/main.js"
 
-var a = new Application();
+var a = new $.Application();
 alert(a.version());
 ```
 
-## 使用介绍
+
+## 使用方法
 
 ### 模块
 
-本项目封装了如下一些模块
+本项目封装了如下一些模块，用于提供Photoshop的底层接口
 
 1. Application
 2. Document
@@ -48,74 +49,155 @@ alert(a.version());
 
 每个模块提供了许多的Api方便使用，绝大多数的Api封装的是Action Manager代码，性能更优。更多的功能在持续添加当中。
 
-
-### 文档相关操作 
+为了避免命名空间冲突，所有的模块都是以"$"开头，所以你可以直接使用
 
 ```javascript
-// 打开一个本地文件
-var theApp = new Application();
+var app = new $.Application();
+```
+
+每个模块都提供了许多常用的api，你可以查看源码来了解更多的细节。
+
+下面的代码片段向你展示如何来使用这些模块
+
+### Application
+
+Application 表示当前Photoshop宿主对象，你可以通过它获取到当前宿主的一些信息。
+
+```javascript
+var theApp = new $.Application();
+
+// 打开一个文件
 theApp.open("/path/to/a/file");
 
+// 获取当前宿主的版本
+theApp.getHostVersion();    // CC2022
+
+// 获取当前素宿主的安装路径
+theApp.getApplicationPath();       // /Applications/Adobe Photoshop 2022/Adobe Photoshop 2022.app
+
+```
+
+### Documents
+
+Document 表示当前打开的PSD文档，你可以通过它来获取当前文档的信息，以及操作它。
+
+```javascript
 // 获取当前打开的文档
-var doc = Document.activeDocument();
+var doc = $.Document.activeDocument();
 if (doc == null) {
     alert("no doucment opened");
     return;
 }
-alert(doc.name());  // 文档名称
+alert(doc.name());  // 输出文档的名称
 $.writeln(doc.length());    // 文档的体积
-doc.trim(); // 删除透明元素
-doc.close();   // 关闭文档 
-
-// 打开一个本地的文档 (open a local document)
-let doc1 = App.open(test + '/assets/document_trim.psd');
-doc1.trim();  // 裁剪文档中的透明区域 (trim the transparent area)
-
+doc.trim(); // 裁切文档编译透明像素
 ```
 
+### Layer
 
-### 图层相关操作
+Layer 代表了图层对象，是一个非常常用和重要的目标对象，里头封装了非常多图层操作相关的方法。
 
 ```javascript
-// 获取当前选中的图层列表
-var layers = Layer.getSelectedLayers();
+
+// 获取当前选中的图层
+var layers = $.Layer.getSelectedLayers();
 for (var i=0; i<layers.length; i++) {
     var layer = layers[i];
     $.writeln(layer.name());    // layer name
     $.writeln(layer.index());    // layer index
 }
 
-var layer = Layer.getLayerByIndex(10);
-layer.setName('an awesome name');   // 修改图层名称
-var bounds = layer.getBounds();   // 获取图层尺寸
+var layer = $.Layer.getLayerByIndex(10);
+layer.setName('an awesome name');   // 设置图层名称
+var bounds = layer.getBounds();   // 获取图层的位置和大小
 var size = bounds.size();
 $.writeln(size.toString());  // 200 x 100  ( output layer size)
 
-layer.hide();   // 隐藏图层
-layer.show();   // 显示图层
-layer.select(); // 选中图层
-layer.toSelection();    // 根据图层创建选区
-layer.rasterize();    // 栅格化图层
+layer.hide();   // hide the layer
+layer.show();   // show the layer
+layer.select(); // set select the layer
+layer.toSelection();    // create a selection with the layer bounds
+layer.rasterize();    // rasterize the layer
 
-// 你还可以像JQuery一样进行链式调用
+// 你还可以像使用jQuery一样的链式调用来使用他们
 layer.selct().toSelection().hide();
 
 ```
 
-### 选区操作 
+### Selection
+
+Selection 表示当前的选区对象，你可以通过它来创建一个选区，获取当前选区的一些信息
 
 ```javascript
-// 创建一个选区
-var bounds = new Rect(100, 100, 100, 100);
-var selection = new Selection(bounds);
+// create a selection
+var bounds = new $.Rect(100, 100, 100, 100);
+var selection = new $.Selection(bounds);
 selection.create();
 ```
 
-### 画布操作 (Canvas)
+### Canvas
 
-// TODO
-画布可以通过简单的api在文档中绘制图形 
+Canvas 画布对象，你可以通过它来很方便的在Ps中进行画图。
 
+```javascript
+// 创建一个空的画布
+var canvas = new $.Canvas();
+
+// 创建一个圆形
+var circle = new $.Circle(new Point(100, 100), 50);
+// 创建一个矩形
+var rect = new $.Rect(100, 100, 100, 100);
+// 一条线
+var line = new $.Line(new Point(100, 100), new Point(200, 200));
+// 把这些图形添加到画布上
+canvas.add(circle);
+canvas.add(rect);
+canvas.add(line);
+
+// 设置画布的填充颜色
+canvas.setFillColor($.SolidColor.fromHexString("#ff5c5c"));
+// 开始绘制
+canvas.paint();
+```
+
+### Guide
+
+Guide 是参考线对象，可以很方便的去操控Ps中的参考线
+
+```javascript
+// 添加一条参考线
+$.Guide.add({position: 10, direction: 'horizontal'});
+// 获取当前所有的参考线
+var guides = $.Guide.all();
+for (var i=0; i<guides.length; i++) {
+    var guide = guides[i];
+    $.writeln(guide.position());
+    $.writeln(guide.direction());
+}
+```
+
+### History
+
+History 表示Ps中的历史面板，提供了一些好用的方法来操控历史对象
+
+```javascript
+// 回退一步
+History.previous();
+// 跳到指定的历史步骤
+History.go(3);
+
+// 你可以很方便的保存当前的状态，再进行一些复杂的操作之后，恢复回来
+History.saveState();
+// do your stuff here...
+History.restoreState();
+
+```
+
+其它的模块的用法类似，请参考代码进行使用。
+
+如有遇到问题，请提issue，或者加入微信群交流：
+
+![微信群](https://blog.cutterman.cn/assets/img/wx-group.jpg)
 
 ## 关于作者
 业余独立开发者，前百度资深高级工程师，熟悉软件工程，熟悉web、移动端、多媒体开发技术，热爱设计。业余开发过多款设计相关的产品，产品拥有几十万的设计师用户。下面是对应产品的网站：

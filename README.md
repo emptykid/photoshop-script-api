@@ -4,9 +4,9 @@
 
 ## About
 
-When develop CEP Panels in Photoshop, we use Javascript DOM API to communicate with the host, It's easily understood and used, but insufficient interfaces offered to accomplish complex works. There is another way call "Action Descriptor" which is more powerful and comprehensive, but extremely confusing to learn and use.
+When develop CEP Panels in Photoshop, we use Javascript DOM API to communicate with the host, It's easily understood and used, but insufficient interfaces offered to accomplish complex works. There is another way call "Action Descriptor" which is more powerful and comprehensive, while extremely confusing to learn and use.
 
-This project wraps the AM codes and build a friendly use js api to offer powerful and sufficient interfaces for Photoshop plugin develop.
+This project wraps the AM codes and build a friendly use js api to offer powerful and sufficient interfaces for Photoshop plugin development.
 
 ## install
 
@@ -50,7 +50,7 @@ This module includes some Classes listed below
 12. MetaData
 13. ...
 
-more will be adding in future
+more will be added in future
 
 in order to avoid namespace conflict, all class names are prefixed with "$", so you can use them like this
 
@@ -60,15 +60,29 @@ var app = new $.Application();
 
 each Class offers some useful api to make things happen, you can check out the code to get more detail.
 
+below snippets are some simple examples to demonstrate how to use the api
+
 ### Application
 
+Application indicates the Photoshop application itself, it offers some useful api to get the application information
+
 ```javascript
-// open a file
 var theApp = new $.Application();
+
+// open a file
 theApp.open("/path/to/a/file");
+
+// get the host version
+theApp.getHostVersion();    // CC2022
+
+// get the host installation path
+theApp.getApplicationPath();       // /Applications/Adobe Photoshop 2022/Adobe Photoshop 2022.app
+
 ```
 
 ### Documents
+
+Document indicates the opened document in Photoshop, it offers some useful api to get the document information
 
 ```javascript
 // get current active document
@@ -82,7 +96,9 @@ $.writeln(doc.length());    // document size in bytes
 doc.trim(); // trim document transparent area
 ```
 
-### Layers
+### Layer
+
+Layer indicates the layer in Photoshop, it helps you to manipulate the layer easily.
 
 ```javascript
 
@@ -112,6 +128,8 @@ layer.selct().toSelection().hide();
 ```
 
 ### Selection
+
+Selection indicates the selection in Photoshop. You can create or get the selection and manipulate it.
 
 ```javascript
 // create a selection
@@ -144,6 +162,44 @@ canvas.setFillColor($.SolidColor.fromHexString("#ff5c5c"));
 // we paint
 canvas.paint();
 ```
+
+### Guide
+
+Guide wraps the guide api in Photoshop, it helps you to create or remove guides easily.
+
+```javascript
+// create a guide
+$.Guide.add({position: 10, direction: 'horizontal'});
+// get all guides
+var guides = $.Guide.all();
+for (var i=0; i<guides.length; i++) {
+    var guide = guides[i];
+    $.writeln(guide.position());
+    $.writeln(guide.direction());
+}
+```
+
+### History
+
+History offers some useful api to manipulate the history stack in Photoshop.
+
+```javascript
+// step backword
+History.previous();
+// go to the history state
+History.go(3);
+
+// save the current history state
+// and do your stuff, then restore the history state
+History.saveState();
+// do your stuff here...
+History.restoreState();
+
+```
+
+other classes are similar to use, you can check out the code to get more detail.
+
+if any questions, please post an issue.
 
 ## About Me
 
