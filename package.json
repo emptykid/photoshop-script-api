@@ -29,6 +29,9 @@
     "webpack-cli": "^4.10.0",
     "webpack-dev-server": "^4.9.2"
   },
+  "peerDependencies": {
+
+  },
   "dependencies": {
     "cep-shim": "^4.5.12",
     "extendscript-es5-shim": "^0.3.1"

@@ -157,7 +157,12 @@ export class Text {
         for (let i=0; i<textStyleRanges.count; i++) {
             const textStyleRange = textStyleRanges.getObjectValue(i);
             const styleDesc = textStyleRange.getObjectValue(app.stringIDToTypeID("textStyle"));
-            colors.push(SolidColor.fromDescriptor(styleDesc.getObjectValue(app.stringIDToTypeID("color"))));
+            if (styleDesc.hasKey(app.stringIDToTypeID("color"))) {
+                colors.push(SolidColor.fromDescriptor(styleDesc.getObjectValue(app.stringIDToTypeID("color"))));
+            } else {
+                const baseParentStyle = styleDesc.getObjectValue(app.stringIDToTypeID("baseParentStyle"));
+                colors.push(SolidColor.fromDescriptor(baseParentStyle.getObjectValue(app.stringIDToTypeID("color"))));
+            }
         }
         return colors;
     }
