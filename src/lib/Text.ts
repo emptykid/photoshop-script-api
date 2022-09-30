@@ -160,8 +160,10 @@ export class Text {
             if (styleDesc.hasKey(app.stringIDToTypeID("color"))) {
                 colors.push(SolidColor.fromDescriptor(styleDesc.getObjectValue(app.stringIDToTypeID("color"))));
             } else {
-                const baseParentStyle = styleDesc.getObjectValue(app.stringIDToTypeID("baseParentStyle"));
-                colors.push(SolidColor.fromDescriptor(baseParentStyle.getObjectValue(app.stringIDToTypeID("color"))));
+                if (styleDesc.hasKey(app.stringIDToTypeID("baseParentStyle\""))) {
+                    const baseParentStyle = styleDesc.getObjectValue(app.stringIDToTypeID("baseParentStyle"));
+                    colors.push(SolidColor.fromDescriptor(baseParentStyle.getObjectValue(app.stringIDToTypeID("color"))));
+                }
             }
         }
         return colors;
