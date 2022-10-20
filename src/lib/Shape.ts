@@ -19,7 +19,6 @@ export enum FillType {
 
 export class Shape {
     descriptorType: number;
-    fillType: FillType = FillType.None;
 
     constructor(descriptorType: number) {
         this.descriptorType = descriptorType;
@@ -31,10 +30,6 @@ export class Shape {
 
     toDescriptor(): ActionDescriptor {
         throw new Error("Method not implemented.");
-    }
-
-    setFillType(type: FillType) {
-        this.fillType = type;
     }
 
     draw(fillColor: SolidColor | GradientColor, stroke: Stroke = null, opacity: number = 100, toLayer: number = 0): Layer {
@@ -49,7 +44,7 @@ export class Shape {
             const solidColorLayerDescriptor = new ActionDescriptor();
             solidColorLayerDescriptor.putObject(app.charIDToTypeID("Clr "), app.charIDToTypeID("RGBC"), fillColor.toDescriptor());
             layerDescriptor.putObject(app.charIDToTypeID("Type"), app.stringIDToTypeID("solidColorLayer"), solidColorLayerDescriptor);
-        } else if (this.fillType == FillType.GradientColor) {
+        } else  {
             layerDescriptor.putObject(app.charIDToTypeID("Type"), app.stringIDToTypeID("gradientLayer"), fillColor.toDescriptor());
         }
         layerDescriptor.putUnitDouble(app.charIDToTypeID("Opct"), app.charIDToTypeID("#Prc"), opacity);

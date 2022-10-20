@@ -160,15 +160,15 @@ Canvas makes easy to draw shapes in document
 var canvas = new $.Canvas();
 
 // create a circle
-var circle = new $.Circle(new Point(100, 100), 50);
+var circle = new $.Circle(new $.Point(100, 100), 50);
 // create a rectangle
 var rect = new $.Rect(100, 100, 100, 100);
 // create a line
-var line = new $.Line(new Point(100, 100), new Point(200, 200));
+var line = new $.Line(new $.Point(100, 100), new $.Point(200, 200));
 // add shappe to canvas
-canvas.add(circle);
-canvas.add(rect);
-canvas.add(line);
+canvas.addShape(circle);
+canvas.addShape(rect);
+canvas.addShape(line);
 
 // we set the color of the shape
 canvas.setFillColor($.SolidColor.fromHexString("#ff5c5c"));
