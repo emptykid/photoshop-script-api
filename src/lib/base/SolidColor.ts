@@ -82,6 +82,18 @@ export class SolidColor {
     }
 
     /**
+     * create a SolidColor object with red/green/blue value
+     * @param red
+     * @param green
+     * @param blue
+     * @return SolidColor
+     */
+    public static fromRGB(red: number, green: number, blue: number): SolidColor {
+        return new SolidColor(red, green, blue);
+    }
+
+
+    /**
      * convert color to hex string format
      * @param alpha where to show alpha value
      * @return string

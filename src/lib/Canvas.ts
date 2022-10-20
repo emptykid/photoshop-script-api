@@ -6,10 +6,11 @@
 import {Shape} from "./Shape";
 import {Stroke} from "./Stroke";
 import {SolidColor} from "./base/SolidColor";
+import {GradientColor} from "./base/GradientColor";
 
 export class Canvas {
     private shapeList: Shape[];
-    private fill: SolidColor;
+    private fill: SolidColor | GradientColor;
     private stroke: Stroke;
     private opacity: number;
 
@@ -20,7 +21,7 @@ export class Canvas {
         this.opacity = 100;
     }
 
-    public setFillColor(color: SolidColor): void {
+    public setFillColor(color: SolidColor | GradientColor): void {
         this.fill = color;
     }
 
@@ -56,10 +57,15 @@ export class Canvas {
         const layerDescriptor = new ActionDescriptor();
 
         // fill
-        const solidColorLayerDescriptor = new ActionDescriptor();
-        solidColorLayerDescriptor.putObject(app.charIDToTypeID("Clr "), app.charIDToTypeID("RGBC"), this.fill.toDescriptor());
-        layerDescriptor.putUnitDouble(app.charIDToTypeID("Opct"), app.charIDToTypeID("#Prc"), this.opacity);
-        layerDescriptor.putObject(app.charIDToTypeID("Type"), app.stringIDToTypeID("solidColorLayer"), solidColorLayerDescriptor);
+        if (this.fill instanceof SolidColor) {
+            const solidColorLayerDescriptor = new ActionDescriptor();
+            solidColorLayerDescriptor.putObject(app.charIDToTypeID("Clr "), app.charIDToTypeID("RGBC"), this.fill.toDescriptor());
+            layerDescriptor.putUnitDouble(app.charIDToTypeID("Opct"), app.charIDToTypeID("#Prc"), this.opacity);
+            layerDescriptor.putObject(app.charIDToTypeID("Type"), app.stringIDToTypeID("solidColorLayer"), solidColorLayerDescriptor);
+        } else if (this.fill instanceof GradientColor) {
+            const gradientLayerDescriptor = new ActionDescriptor();
+            layerDescriptor.putObject(app.charIDToTypeID("Type"), app.stringIDToTypeID("gradientLayer"), this.fill.toDescriptor());
+        }
 
         // stroke
         if (this.stroke != null) {

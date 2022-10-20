@@ -103,10 +103,22 @@ export class Text {
     }
 
     public size(): number {
-        if (this.styleDesc.hasKey(app.stringIDToTypeID("impliedFontSize"))) {
-            return this.styleDesc.getDouble(app.stringIDToTypeID("impliedFontSize"));
+        const sizeArr = ["impliedFontSize", "size"];
+        for (let i=0; i<sizeArr.length; i++) {
+            if (this.styleDesc.hasKey(app.stringIDToTypeID(sizeArr[i]))) {
+                return this.styleDesc.getDouble(app.stringIDToTypeID(sizeArr[i]));
+            }
         }
-        return this.styleDesc.getDouble(app.stringIDToTypeID("size"));
+        if (this.styleDesc.hasKey(app.stringIDToTypeID("baseParentStyle"))) {
+            const baseParentStyle = this.styleDesc.getObjectValue(app.stringIDToTypeID("baseParentStyle"));
+            for (let i=0; i<sizeArr.length; i++) {
+                if (baseParentStyle.hasKey(app.stringIDToTypeID(sizeArr[i]))) {
+                    return baseParentStyle.getDouble(app.stringIDToTypeID(sizeArr[i]));
+                }
+            }
+        }
+
+        return 12;
     }
 
     public horizontalScale(): number {
@@ -148,7 +160,10 @@ export class Text {
     }
 
     public color(): SolidColor {
-        return SolidColor.fromDescriptor(this.styleDesc.getObjectValue(app.stringIDToTypeID("color")));
+        if (this.styleDesc.hasKey(app.stringIDToTypeID("color"))) {
+            return SolidColor.fromDescriptor(this.styleDesc.getObjectValue(app.stringIDToTypeID("color")));
+        }
+        return SolidColor.blackColor();
     }
 
     public colorList(): SolidColor[] {

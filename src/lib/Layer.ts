@@ -393,6 +393,26 @@ export class Layer {
         return null;
     }
 
+    maskEnabled(): boolean {
+        const layerReference = new ActionReference();
+        layerReference.putIdentifier(app.charIDToTypeID("Lyr "), this.id);
+        const descriptor = app.executeActionGet(layerReference);
+        if (descriptor.hasKey(app.stringIDToTypeID("userMaskEnabled"))) {
+            return descriptor.getBoolean(app.stringIDToTypeID("userMaskEnabled"));
+        }
+        return false;
+    }
+
+    maskLinked(): boolean {
+        const layerReference = new ActionReference();
+        layerReference.putIdentifier(app.charIDToTypeID("Lyr "), this.id);
+        const descriptor = app.executeActionGet(layerReference);
+        if (descriptor.hasKey(app.stringIDToTypeID("userMaskLinked"))) {
+            return descriptor.getBoolean(app.stringIDToTypeID("userMaskLinked"));
+        }
+        return false;
+    }
+
 
     kind(): number {
         const layerReference = new ActionReference();

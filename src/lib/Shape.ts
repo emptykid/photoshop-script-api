@@ -2,6 +2,7 @@ import { Rect } from "./Rect";
 import {Stroke} from "./Stroke";
 import {SolidColor} from "./base/SolidColor";
 import {Layer} from "./Layer";
+import {GradientColor} from "./base/GradientColor";
 
 export enum UnitType {
     Pixel = "pixelsUnit",
@@ -10,8 +11,15 @@ export enum UnitType {
     Distance = "distanceUnit"
 }
 
+export enum FillType {
+    None,
+    SolidColor,
+    GradientColor,
+}
+
 export class Shape {
     descriptorType: number;
+    fillType: FillType = FillType.None;
 
     constructor(descriptorType: number) {
         this.descriptorType = descriptorType;
@@ -25,7 +33,11 @@ export class Shape {
         throw new Error("Method not implemented.");
     }
 
-    draw(fillColor: SolidColor, stroke: Stroke = null, opacity: number = 100, toLayer: number = 0): Layer {
+    setFillType(type: FillType) {
+        this.fillType = type;
+    }
+
+    draw(fillColor: SolidColor | GradientColor, stroke: Stroke = null, opacity: number = 100, toLayer: number = 0): Layer {
         const desc448 = new ActionDescriptor();
         const ref321 = new ActionReference();
         ref321.putClass(app.stringIDToTypeID("contentLayer"));
@@ -33,9 +45,13 @@ export class Shape {
 
         const layerDescriptor = new ActionDescriptor();
 
-        const solidColorLayerDescriptor = new ActionDescriptor();
-        solidColorLayerDescriptor.putObject(app.charIDToTypeID("Clr "), app.charIDToTypeID("RGBC"), fillColor.toDescriptor());
-        layerDescriptor.putObject(app.charIDToTypeID("Type"), app.stringIDToTypeID("solidColorLayer"), solidColorLayerDescriptor);
+        if (fillColor instanceof SolidColor) {
+            const solidColorLayerDescriptor = new ActionDescriptor();
+            solidColorLayerDescriptor.putObject(app.charIDToTypeID("Clr "), app.charIDToTypeID("RGBC"), fillColor.toDescriptor());
+            layerDescriptor.putObject(app.charIDToTypeID("Type"), app.stringIDToTypeID("solidColorLayer"), solidColorLayerDescriptor);
+        } else if (this.fillType == FillType.GradientColor) {
+            layerDescriptor.putObject(app.charIDToTypeID("Type"), app.stringIDToTypeID("gradientLayer"), fillColor.toDescriptor());
+        }
         layerDescriptor.putUnitDouble(app.charIDToTypeID("Opct"), app.charIDToTypeID("#Prc"), opacity);
 
         // stroke
