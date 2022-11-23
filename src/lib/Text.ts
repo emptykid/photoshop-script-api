@@ -47,8 +47,10 @@ export class Text {
             this.textDesc = desc;
             const textStyleRanges = desc.getList(app.stringIDToTypeID("textStyleRange"));
             this.styleRangeCount = textStyleRanges.count;
-            const textStyleRange = textStyleRanges.getObjectValue(0);
-            this.styleDesc = textStyleRange.getObjectValue(app.stringIDToTypeID("textStyle"));
+            if (this.styleRangeCount > 0) {
+                const textStyleRange = textStyleRanges.getObjectValue(0);
+                this.styleDesc = textStyleRange.getObjectValue(app.stringIDToTypeID("textStyle"));
+            }
         } else {
             this.textDesc = new ActionDescriptor();
             this.textDesc.putString( app.stringIDToTypeID( "textKey" ), content );
@@ -91,15 +93,24 @@ export class Text {
     }
 
     public fontPostScriptName(): string {
-        return this.styleDesc.getString(app.stringIDToTypeID("fontPostScriptName"));
+        if (this.styleDesc) {
+            return  this.styleDesc.getString(app.stringIDToTypeID("fontPostScriptName"));
+        }
+        return "";
     }
 
     public fontName(): string {
-        return  this.styleDesc.getString(app.stringIDToTypeID("fontName"));
+        if (this.styleDesc) {
+            return  this.styleDesc.getString(app.stringIDToTypeID("fontName"));
+        }
+        return "";
     }
 
     public fontStyleName(): string {
-        return this.styleDesc.getString(app.stringIDToTypeID("fontStyleName"));
+        if (this.styleDesc) {
+            return  this.styleDesc.getString(app.stringIDToTypeID("fontStyleName"));
+        }
+        return "";
     }
 
     public size(): number {

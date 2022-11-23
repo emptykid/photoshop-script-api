@@ -16,7 +16,8 @@ import {FXDropShadow} from "./fx/FXDropShadow";
 import {Text} from "./Text";
 import {FXGradientFill} from "./fx/FXGradientFill";
 
-const enum Kind {NORMAL = 1, TEXT = 3, VECTOR = 4};
+const enum Kind {NORMAL = 1, TEXT = 3, VECTOR = 4}
+export const enum LayerMoveDirection { UP = "next", DOWN = "previous" }
 
 export class Layer {
     id: number;
@@ -689,7 +690,12 @@ export class Layer {
         if (!layerEffects.hasKey(app.stringIDToTypeID(name))) {
             return null;
         }
-        return layerEffects.getObjectValue(app.stringIDToTypeID(name));
+        const effect = layerEffects.getObjectValue(app.stringIDToTypeID(name));
+        const enabled = effect.getBoolean(app.stringIDToTypeID("enabled"));
+        if (enabled === false) {
+            return null;
+        }
+        return effect;
     }
 
     getFxColorOverlay(): FXColorOverlay | null {
@@ -762,6 +768,21 @@ export class Layer {
         desc26.putObject( app.charIDToTypeID( "T   " ), app.charIDToTypeID( "Lyr " ), desc27 );
         app.executeAction( app.charIDToTypeID( "setd" ), desc26, DialogModes.NO );
         return this;
+    }
+
+    /**
+     * move current layer up or down with one step each
+     * @param direction
+     */
+    move(direction: LayerMoveDirection) : void {
+        const descriptor = new ActionDescriptor();
+        const reference = new ActionReference();
+        const reference2 = new ActionReference();
+        reference.putEnumerated( app.stringIDToTypeID( "layer" ), app.stringIDToTypeID( "ordinal" ), app.stringIDToTypeID( "targetEnum" ));
+        descriptor.putReference( app.charIDToTypeID( "null" ), reference );
+        reference2.putEnumerated( app.stringIDToTypeID( "layer" ), app.stringIDToTypeID( "ordinal" ), app.stringIDToTypeID( direction ));
+        descriptor.putReference( app.stringIDToTypeID( "to" ), reference2 );
+        app.executeAction( app.stringIDToTypeID( "move" ), descriptor, DialogModes.NO );
     }
 
     // FIXME  这个函数不通用，需要改造
