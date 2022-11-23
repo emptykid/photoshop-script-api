@@ -17,7 +17,7 @@ import {Text} from "./Text";
 import {FXGradientFill} from "./fx/FXGradientFill";
 
 const enum Kind {NORMAL = 1, TEXT = 3, VECTOR = 4}
-export const enum LayerMoveDirection { UP = "next", DOWN = "previous" }
+export const enum LayerMoveDirection { UP = "next", DOWN = "previous", FRONT = "front", BACK = "back" }
 
 export class Layer {
     id: number;
