@@ -698,6 +698,25 @@ export class Layer {
         return effect;
     }
 
+    getFXEffectMulti(name:string): ActionList | null {
+        let layerReference = new ActionReference();
+        layerReference.putIdentifier(app.charIDToTypeID("Lyr "), this.id);
+        let descriptor = app.executeActionGet(layerReference);
+        const layerFXVisible = descriptor.getBoolean(app.stringIDToTypeID("layerFXVisible"));
+        if (layerFXVisible === false) {
+            return null;
+        }
+        if (!descriptor.hasKey(app.stringIDToTypeID("layerEffects"))) {
+            return null;
+        }
+        const layerEffects = descriptor.getObjectValue(app.stringIDToTypeID("layerEffects"));
+        if (!layerEffects.hasKey(app.stringIDToTypeID(name))) {
+            return null;
+        }
+        return layerEffects.getList(app.stringIDToTypeID(name));
+    }
+
+
     getFxColorOverlay(): FXColorOverlay | null {
         const solidFill = this.getFXEffect("solidFill");
         return solidFill == null? null : FXColorOverlay.fromDescriptor(solidFill);
@@ -706,6 +725,21 @@ export class Layer {
     getFXStroke(): FXStroke | null {
         const frameFX = this.getFXEffect("frameFX")
         return frameFX === null? null : FXStroke.fromDescriptor(frameFX);
+    }
+
+    getFXStrokes(): FXStroke[] {
+        const frameFXMulti = this.getFXEffectMulti("frameFXMulti");
+        const strokes: FXStroke[] = [];
+        if (frameFXMulti !== null) {
+            for (let i = 0; i < frameFXMulti.count; i++) {
+                const frameFX = frameFXMulti.getObjectValue(i);
+                const stroke = FXStroke.fromDescriptor(frameFX);
+                if (stroke !== null && stroke.enabled) {
+                    strokes.push(stroke);
+                }
+            }
+        }
+        return strokes;
     }
 
     getFXDropShadow(): FXDropShadow | null {
