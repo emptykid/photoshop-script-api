@@ -451,6 +451,19 @@ export class Layer {
         return new Rect(left, top, (right - left), (bottom - top));
     }
 
+    boundsNoEffects(): Rect {
+        const layerReference = new ActionReference();
+        layerReference.putProperty(app.charIDToTypeID("Prpr"), app.stringIDToTypeID("boundsNoEffects"));
+        layerReference.putIdentifier(app.charIDToTypeID("Lyr "), this.id);
+        const layerDescriptor = app.executeActionGet(layerReference);
+        const rectangle = layerDescriptor.getObjectValue(app.stringIDToTypeID("boundsNoEffects"));
+        const left = rectangle.getUnitDoubleValue(app.charIDToTypeID("Left"));
+        const top = rectangle.getUnitDoubleValue(app.charIDToTypeID("Top "));
+        const right = rectangle.getUnitDoubleValue(app.charIDToTypeID("Rght"));
+        const bottom = rectangle.getUnitDoubleValue(app.charIDToTypeID("Btom"));
+        return new Rect(left, top, (right - left), (bottom - top));
+    }
+
     // 适用于图层组的场景，确保当前图层已经被选中
     boundsActive(): Rect {
         const bounds = app.activeDocument.activeLayer.bounds;
