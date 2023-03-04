@@ -3,10 +3,10 @@
  * @date 2021/07/30
  * @description selection class for photoshop
  */
-import {Rect} from "./Rect";
+import { Rect } from "./Rect";
 
-export class Selection  {
-    private bounds: Rect;
+export class Selection {
+    public bounds: Rect;
 
     constructor(rect: Rect) {
         this.bounds = rect;
@@ -35,15 +35,15 @@ export class Selection  {
     public static load(selectionName: string, documentName: string = null): Selection {
         const desc1 = new ActionDescriptor();
         const ref1 = new ActionReference();
-        ref1.putProperty( app.stringIDToTypeID( "channel" ), app.stringIDToTypeID( "selection" ) );
-        desc1.putReference( app.stringIDToTypeID( "null" ), ref1 );
+        ref1.putProperty(app.stringIDToTypeID("channel"), app.stringIDToTypeID("selection"));
+        desc1.putReference(app.stringIDToTypeID("null"), ref1);
         const ref2 = new ActionReference();
-        ref2.putName( app.stringIDToTypeID( "channel" ), selectionName );
+        ref2.putName(app.stringIDToTypeID("channel"), selectionName);
         if (documentName) {
-            ref2.putName( app.stringIDToTypeID( "document" ), documentName );
+            ref2.putName(app.stringIDToTypeID("document"), documentName);
         }
-        desc1.putReference( app.stringIDToTypeID( "to" ), ref2 );
-        app.executeAction( app.stringIDToTypeID( "set" ), desc1, DialogModes.NO );
+        desc1.putReference(app.stringIDToTypeID("to"), ref2);
+        app.executeAction(app.stringIDToTypeID("set"), desc1, DialogModes.NO);
 
         return this.get();
     }
@@ -55,12 +55,12 @@ export class Selection  {
     public static fromLayer(): Selection {
         const desc1 = new ActionDescriptor();
         const ref1 = new ActionReference();
-        ref1.putProperty( app.stringIDToTypeID( "channel" ), app.stringIDToTypeID( "selection" ) );
-        desc1.putReference( app.stringIDToTypeID( "null" ), ref1 );
+        ref1.putProperty(app.stringIDToTypeID("channel"), app.stringIDToTypeID("selection"));
+        desc1.putReference(app.stringIDToTypeID("null"), ref1);
         const ref2 = new ActionReference();
-        ref2.putEnumerated( app.stringIDToTypeID( "channel" ), app.stringIDToTypeID( "channel" ), app.stringIDToTypeID( "transparencyEnum" ) );
-        desc1.putReference( app.stringIDToTypeID( "to" ), ref2 );
-        app.executeAction( app.stringIDToTypeID( "set" ), desc1, DialogModes.NO );
+        ref2.putEnumerated(app.stringIDToTypeID("channel"), app.stringIDToTypeID("channel"), app.stringIDToTypeID("transparencyEnum"));
+        desc1.putReference(app.stringIDToTypeID("to"), ref2);
+        app.executeAction(app.stringIDToTypeID("set"), desc1, DialogModes.NO);
         return this.get();
     }
 
@@ -97,7 +97,7 @@ export class Selection  {
      * @return void
      */
     public invert(): void {
-        app.executeAction( app.charIDToTypeID( "Invs" ), undefined, DialogModes.NO );
+        app.executeAction(app.charIDToTypeID("Invs"), undefined, DialogModes.NO);
     }
 
     /**
@@ -107,13 +107,13 @@ export class Selection  {
     public toPath(tolerance: number = 2): void {
         const desc1 = new ActionDescriptor();
         const ref1 = new ActionReference();
-        ref1.putClass( app.stringIDToTypeID( "path" ) );
-        desc1.putReference( app.stringIDToTypeID( "null" ), ref1 );
+        ref1.putClass(app.stringIDToTypeID("path"));
+        desc1.putReference(app.stringIDToTypeID("null"), ref1);
         const ref2 = new ActionReference();
-        ref2.putProperty( app.stringIDToTypeID( "selectionClass" ), app.stringIDToTypeID( "selection" ) );
-        desc1.putReference( app.stringIDToTypeID( "from" ), ref2 );
-        desc1.putUnitDouble( app.stringIDToTypeID( "tolerance" ), app.stringIDToTypeID( "pixelsUnit" ),tolerance);
-        app.executeAction( app.stringIDToTypeID( "make" ), desc1, DialogModes.NO );
+        ref2.putProperty(app.stringIDToTypeID("selectionClass"), app.stringIDToTypeID("selection"));
+        desc1.putReference(app.stringIDToTypeID("from"), ref2);
+        desc1.putUnitDouble(app.stringIDToTypeID("tolerance"), app.stringIDToTypeID("pixelsUnit"), tolerance);
+        app.executeAction(app.stringIDToTypeID("make"), desc1, DialogModes.NO);
     }
 
     /**
@@ -123,10 +123,10 @@ export class Selection  {
     public save(name: string): void {
         const desc1 = new ActionDescriptor();
         const ref1 = new ActionReference();
-        ref1.putProperty( app.stringIDToTypeID( "channel" ), app.stringIDToTypeID( "selection" ) );
-        desc1.putReference( app.stringIDToTypeID( "null" ), ref1 );
-        desc1.putString( app.stringIDToTypeID( "name" ), name );
-        app.executeAction( app.stringIDToTypeID( "duplicate" ), desc1, DialogModes.NO );
+        ref1.putProperty(app.stringIDToTypeID("channel"), app.stringIDToTypeID("selection"));
+        desc1.putReference(app.stringIDToTypeID("null"), ref1);
+        desc1.putString(app.stringIDToTypeID("name"), name);
+        app.executeAction(app.stringIDToTypeID("duplicate"), desc1, DialogModes.NO);
     }
 
 }

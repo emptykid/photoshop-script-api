@@ -163,6 +163,19 @@ export class Document {
     }
 
     /**
+     * duplicate current document
+     * @return Document
+     */
+    public duplicate(): Document {
+        const desc1 = new ActionDescriptor();
+        const ref1 = new ActionReference();
+        ref1.putEnumerated(charIDToTypeID("Dcmn"), charIDToTypeID("Ordn"), charIDToTypeID("Trgt"));
+        desc1.putReference(charIDToTypeID("null"), ref1);
+        app.executeAction(charIDToTypeID("Dplc"), desc1, DialogModes.NO);
+        return new Document();
+    }
+
+    /**
      * resize current document image, equal to action: menu -> Image -> Image Size
      * @param size
      */
