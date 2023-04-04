@@ -15,6 +15,7 @@ import {FXStroke} from "./fx/FXStroke";
 import {FXDropShadow} from "./fx/FXDropShadow";
 import {Text} from "./Text";
 import {FXGradientFill} from "./fx/FXGradientFill";
+import {GradientColor} from "./base/GradientColor";
 
 const enum Kind {NORMAL = 1, TEXT = 3, VECTOR = 4}
 export const enum LayerMoveDirection { UP = "next", DOWN = "previous", FRONT = "front", BACK = "back" }
@@ -906,13 +907,42 @@ export class Layer {
         layerReference.putProperty(app.charIDToTypeID("Prpr"), app.stringIDToTypeID("adjustment"));
         layerReference.putIdentifier(app.charIDToTypeID("Lyr "), this.id);
         const descriptor = app.executeActionGet(layerReference);
-        if (descriptor.hasKey(app.stringIDToTypeID("adjustment"))) {
-            const list =  descriptor.getList( app.stringIDToTypeID( "adjustment" ) ) ;
-            const solidColorLayer = list.getObjectValue(0);
-            const rgbColor = solidColorLayer.getObjectValue(app.charIDToTypeID("Clr "));
-            return SolidColor.fromDescriptor(rgbColor);
+        if (!descriptor.hasKey(app.stringIDToTypeID("adjustment"))) {
+            return null;
         }
-        return null;
+        const list =  descriptor.getList( app.stringIDToTypeID( "adjustment" ) ) ;
+        if (list.count === 0) {
+            return null;
+        }
+        const solidColorLayer = list.getObjectValue(0);
+        if (!solidColorLayer.hasKey(app.charIDToTypeID("Clr "))) {
+            return null;
+        }
+        const rgbColor = solidColorLayer.getObjectValue(app.charIDToTypeID("Clr "));
+        return SolidColor.fromDescriptor(rgbColor);
+    }
+
+    getGradientColor(): GradientColor | null {
+        if (!this.isShapeLayer()) {
+            return null;
+        }
+        const layerReference = new ActionReference();
+        //layerReference.putProperty(app.charIDToTypeID("Prpr"), app.stringIDToTypeID("fillEnabled"));
+        layerReference.putProperty(app.charIDToTypeID("Prpr"), app.stringIDToTypeID("adjustment"));
+        layerReference.putIdentifier(app.charIDToTypeID("Lyr "), this.id);
+        const descriptor = app.executeActionGet(layerReference);
+        if (!descriptor.hasKey(app.stringIDToTypeID("adjustment"))) {
+            return null;
+        }
+        const list =  descriptor.getList( app.stringIDToTypeID( "adjustment" ) ) ;
+        if (list.count === 0) {
+            return null;
+        }
+        const gradientColorLayer = list.getObjectValue(0);
+        if (!gradientColorLayer.hasKey(app.stringIDToTypeID("gradient"))) {
+            return null;
+        }
+        return GradientColor.fromDescriptor(gradientColorLayer);
     }
 
     setFillOpacity(opacity: number): Layer {

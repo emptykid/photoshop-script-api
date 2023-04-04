@@ -57,6 +57,34 @@ export class GradientColor {
         });
     }
 
+    public static fromDescriptor(desc: ActionDescriptor): GradientColor {
+        const gradient = new GradientColor();
+        gradient.angle = desc.getDouble(app.stringIDToTypeID("angle"));
+        gradient.type = app.typeIDToStringID(desc.getEnumerationValue(app.stringIDToTypeID("type"))) as GradientType;
+
+        const gradientDesc = desc.getObjectValue(app.stringIDToTypeID("gradient"));
+
+        const colorStopList = gradientDesc.getList(app.stringIDToTypeID("colors"));
+        for (let i = 0; i < colorStopList.count; i++) {
+            const stop = colorStopList.getObjectValue(i);
+            const color = SolidColor.fromDescriptor(stop.getObjectValue(app.stringIDToTypeID("color")));
+            const position = stop.getInteger(app.stringIDToTypeID("location"));
+            const point = stop.getInteger(app.stringIDToTypeID("midpoint"));
+            gradient.addColorStop(color, position, point);
+        }
+
+        const opacityStopList = gradientDesc.getList(app.stringIDToTypeID("transparency"));
+        for (let i = 0; i < opacityStopList.count; i++) {
+            const stop = opacityStopList.getObjectValue(i);
+            const opacity = stop.getUnitDoubleValue(app.stringIDToTypeID("opacity"));
+            const location = stop.getInteger(app.stringIDToTypeID("location"));
+            const point = stop.getInteger(app.stringIDToTypeID("midpoint"));
+            gradient.addOpacityStop(opacity, location, point);
+        }
+
+        return gradient;
+    }
+
     /**
      * covert current object to ActionDescriptor format
      */
