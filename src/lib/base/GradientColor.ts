@@ -129,4 +129,13 @@ export class GradientColor {
         return desc1;
     }
 
+
+    public toString(): string {
+        let colorStringArr: string[] = [];
+        this.colorStopList.map((colorStop) => {
+            colorStringArr.push(colorStop.color.toHex());
+        });
+        return `${colorStringArr.join('-')} (${this.angle}')`;
+    }
+
 }
