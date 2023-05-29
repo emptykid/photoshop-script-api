@@ -62,8 +62,13 @@ $.Size = _Size;
 import {Stroke as _Stroke, StrokeLineType as _StrokeLineType} from "./lib/Stroke";
 $.Stroke = _Stroke;
 $.StrokeLineType = _StrokeLineType;
-import {Text as _Text} from "./lib/Text";
+import {Text as _Text, TextAlignment as _TextAlignment, TextStrikeThroughType as _TextStrikeThroughType, TextGriddingType as _TextGriddingType, TextOrientation as _TextOrientation, TextAntiAliasType as _TextAntiAliasType} from "./lib/Text";
 $.Text = _Text;
+$.TextAlignment = _TextAlignment;
+$.TextStrikeThroughType = _TextStrikeThroughType;
+$.TextGriddingType = _TextGriddingType;
+$.TextOrientation = _TextOrientation;
+$.TextAntiAliasType = _TextAntiAliasType;
 import {Utils as _Utils} from "./lib/Utils";
 $.Utils = _Utils;
 

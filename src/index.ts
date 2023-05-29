@@ -33,6 +33,6 @@ export {Selection} from "./lib/Selection";
 export {Shape, Point, Line, Circle, Ellipse, Triangle, Rectangle, UnitType} from "./lib/Shape";
 export {Size} from "./lib/Size";
 export {Stroke, StrokeLineType} from "./lib/Stroke";
-export {Text} from "./lib/Text";
+export {Text, TextAntiAliasType, TextGriddingType, TextOrientation, TextStrikeThroughType, TextAlignment} from "./lib/Text";
 export {Utils} from "./lib/Utils";
 
