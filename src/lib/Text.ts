@@ -27,10 +27,17 @@ export enum TextGriddingType {
 
 export enum TextOrientation {
     Horizontal = "horizontal",
+    Vertical = "vertical",
 }
 
 export enum TextStrikeThroughType {
     Off = "strikethroughOff",
+}
+
+export enum TextAlignment {
+    Left = "left",
+    Center = "center",
+    Right = "right",
 }
 
 export class Text {
@@ -38,6 +45,7 @@ export class Text {
     public descriptorType: number = app.stringIDToTypeID( "textLayer" );
     public readonly textDesc: ActionDescriptor;
     public readonly styleDesc: ActionDescriptor;
+    public readonly paragraphDesc: ActionDescriptor;
     private readonly styleRangeCount: number = 1;
 
     constructor(content: string, desc: ActionDescriptor = null)  {
@@ -65,6 +73,8 @@ export class Text {
             this.styleDesc.putBoolean( app.stringIDToTypeID( "styleSheetHasParent" ), true );
             this.setColor(SolidColor.blackColor());
         }
+        this.paragraphDesc = new ActionDescriptor();
+        this.paragraphDesc.putBoolean( app.stringIDToTypeID( "styleSheetHasParent" ), true );
     }
 
     static fromDescriptor(desc: ActionDescriptor): Text {
@@ -289,6 +299,11 @@ export class Text {
         return this;
     }
 
+    public setAlignment(alignment: TextAlignment): Text {
+        this.paragraphDesc.putEnumerated(stringIDToTypeID("align"), stringIDToTypeID("align"), stringIDToTypeID(alignment));
+        return this;
+    }
+
     public paint() {
         const desc1 = new ActionDescriptor();
         const ref1 = new ActionReference();
@@ -304,6 +319,14 @@ export class Text {
         list2.putObject( app.stringIDToTypeID( "textStyleRange" ), desc10 );
         this.textDesc.putList( app.stringIDToTypeID( "textStyleRange" ), list2 );
 
+        // paragraph style range
+        const desc11 = new ActionDescriptor();
+        desc11.putInteger( app.stringIDToTypeID( "from" ), 0 );
+        desc11.putInteger( app.stringIDToTypeID( "to" ), this.content.length );
+        desc11.putObject( app.stringIDToTypeID( "paragraphStyle" ), app.stringIDToTypeID( "paragraphStyle" ), this.paragraphDesc );
+        const list3 = new ActionList();
+        list3.putObject( app.stringIDToTypeID( "paragraphStyleRange" ), desc11 );
+        this.textDesc.putList( app.stringIDToTypeID( "paragraphStyleRange" ), list3 );
 
         desc1.putObject( app.stringIDToTypeID( "using" ), app.stringIDToTypeID( "textLayer" ), this.textDesc);
         app.executeAction( app.stringIDToTypeID( "make" ), desc1, DialogModes.NO );

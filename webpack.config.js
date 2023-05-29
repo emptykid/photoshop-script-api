@@ -12,6 +12,7 @@ module.exports = (env, argv) => {
         entry: {
             index: './src/index.ts',
             main: './src/main.ts',
+            test: './test/unittest_Text.ts'
         },
         resolve: {
             extensions: ['.js', '.ts', '.json'],

@@ -61,7 +61,7 @@ This module includes some Classes listed below
 10. Color
 11. Stroke
 12. MetaData
-13. ...
+13. Text
 
 more will be added in future
 
@@ -208,6 +208,19 @@ History.saveState();
 // do your stuff here...
 History.restoreState();
 
+```
+
+### Text
+
+Text wrap a new Class to handle the hard code of ActionDescriptor to create text layer in Photoshop.
+
+```javascript
+// create a text layer in canvas
+var text = new $.Text("Hello World");
+text.setTextClickPoint(new $.Point(100, 100));
+text.setSize(30);
+text.setAlignment(TextAlignment.Right);
+text.paint();
 ```
 
 other classes are similar to use, you can check out the code to get more detail.

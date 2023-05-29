@@ -1,15 +1,18 @@
 {
-    "compilerOptions": {
-        "module": "es6",
-        "target": "ES3",
-        "outDir": "./dist/",
-        "noImplicitAny": true,
-        "declaration": true,
-        "skipLibCheck": true,
-        "typeRoots": ["./typings"],
-        "sourceMap": true
-    },
-    "exclude": [
-        "node_modules"
-    ]
+  "compilerOptions": {
+    "module": "es6",
+    "target": "ES3",
+    "outDir": "./dist/",
+    "noImplicitAny": true,
+    "declaration": true,
+    "skipLibCheck": true,
+    "ignoreDeprecations": "5.0",
+    "typeRoots": [
+      "./typings"
+    ],
+    "sourceMap": true
+  },
+  "exclude": [
+    "node_modules"
+  ]
 }

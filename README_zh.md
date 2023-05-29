@@ -207,6 +207,19 @@ History.restoreState();
 
 ```
 
+### Text
+
+可以通过此对象，非常方便的在Ps中读取和创建文字图层，设置图层的样式等操作
+
+```javascript
+// 用简单的代码来创建一个文字图层
+var text = new $.Text("Hello World");
+text.setTextClickPoint(new $.Point(100, 100));
+text.setSize(30);
+text.setAlignment(TextAlignment.Right);
+text.paint();
+```
+
 其它的模块的用法类似，请参考代码进行使用。
 
 如有遇到问题，请提issue，或者加入微信群交流：
