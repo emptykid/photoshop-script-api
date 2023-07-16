@@ -103,22 +103,28 @@ export class Text {
     }
 
     public fontPostScriptName(): string {
-        if (this.styleDesc) {
-            return  this.styleDesc.getString(app.stringIDToTypeID("fontPostScriptName"));
-        }
-        return "";
+        return this.safeGetStyle("fontPostScriptName");
     }
 
     public fontName(): string {
-        if (this.styleDesc) {
-            return  this.styleDesc.getString(app.stringIDToTypeID("fontName"));
-        }
-        return "";
+        return this.safeGetStyle("fontName");
     }
 
     public fontStyleName(): string {
+        return this.safeGetStyle("fontStyleName");
+    }
+
+    private safeGetStyle(key: string): string {
         if (this.styleDesc) {
-            return  this.styleDesc.getString(app.stringIDToTypeID("fontStyleName"));
+            if (this.styleDesc.hasKey(stringIDToTypeID(key))) {
+                return this.styleDesc.getString(stringIDToTypeID(key));
+            }
+            if (this.styleDesc.hasKey(stringIDToTypeID("baseParentStyle"))) {
+                const baseParentStyle = this.styleDesc.getObjectValue(stringIDToTypeID("baseParentStyle"));
+                if (baseParentStyle.hasKey(stringIDToTypeID(key))) {
+                    return baseParentStyle.getString(stringIDToTypeID(key));
+                }
+            }
         }
         return "";
     }
@@ -143,11 +149,17 @@ export class Text {
     }
 
     public horizontalScale(): number {
-        return this.styleDesc.getDouble(app.stringIDToTypeID("horizontalScale"));
+        if (this.styleDesc.hasKey(stringIDToTypeID("horizontalScale"))) {
+            return this.styleDesc.getDouble(app.stringIDToTypeID("horizontalScale"));
+        }
+        return 0;
     }
 
     public verticalScale(): number {
-        return this.styleDesc.getDouble(app.stringIDToTypeID("verticalScale"));
+        if (this.styleDesc.hasKey(stringIDToTypeID("verticalScale"))) {
+            return this.styleDesc.getDouble(app.stringIDToTypeID("verticalScale"));
+        }
+        return 0;
     }
 
     public bold(): boolean {
@@ -172,12 +184,18 @@ export class Text {
     }
 
     public strikethrough(): TextStrikeThroughType {
-        const strikethrough = app.typeIDToStringID(this.styleDesc.getEnumerationValue(app.stringIDToTypeID("strikethrough")));
-        return strikethrough as TextStrikeThroughType;
+        if (this.styleDesc.hasKey(stringIDToTypeID("strikethrough"))) {
+            const strikethrough = app.typeIDToStringID(this.styleDesc.getEnumerationValue(app.stringIDToTypeID("strikethrough")));
+            return strikethrough as TextStrikeThroughType;
+        }
+        return TextStrikeThroughType.Off;
     }
 
     public underline(): string {
-        return app.typeIDToStringID(this.styleDesc.getEnumerationValue(app.stringIDToTypeID("underline")));
+        if (!this.styleDesc.hasKey(stringIDToTypeID("underline"))) {
+            return app.typeIDToStringID(this.styleDesc.getEnumerationValue(app.stringIDToTypeID("underline")));
+        }
+        return "";
     }
 
     public color(): SolidColor {

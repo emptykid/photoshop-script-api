@@ -8,6 +8,7 @@ import {Rect} from "./Rect";
 import {Size} from "./Size";
 import {UnitType} from "./Shape";
 import {ColorSampler} from "./ColorSampler";
+import {PSColorMode} from "./base/Includes";
 
 export enum DocumentFormat {
     JPG = "JPEG",
@@ -450,6 +451,17 @@ export class Document {
         }
 
         return ret;
+    }
+
+    /**
+     * convert current document color mode
+     * @param mode
+     */
+    public convertColorMode(mode: PSColorMode): Document {
+        var desc1 = new ActionDescriptor();
+        desc1.putClass( stringIDToTypeID( "to" ), stringIDToTypeID( "CMYKColorMode" ) );
+        app.executeAction( stringIDToTypeID( "convertMode" ), desc1, DialogModes.NO );
+        return this;
     }
 
 }

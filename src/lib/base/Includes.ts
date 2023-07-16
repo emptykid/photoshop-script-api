@@ -19,3 +19,12 @@ export enum PSLayerColor {
     violet = 'violet',
     gray = 'gray'
 }
+
+export enum PSColorMode {
+    RGB = 'RGBColorMode',
+    CMYK = 'CMYKColorMode',
+    LAB = 'labColorMode',
+    GRAYSCALE = 'grayscaleMode',
+    INDEXED = 'indexedColorMode',
+    MULTICHANNEL = 'multichannelMode',
+}
