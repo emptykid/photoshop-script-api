@@ -189,9 +189,9 @@ export class Document {
             action.putUnitDouble(charIDToTypeID("Hght"), charIDToTypeID("#Pxl"), size.height);
         }
         if (size.width == 0 || size.height == 0) {
-            action.putBoolean(stringIDToTypeID("scaleStyles"), true);
             action.putBoolean(charIDToTypeID("CnsP"), true);
         }
+        action.putBoolean(stringIDToTypeID("scaleStyles"), true);
         action.putBoolean( stringIDToTypeID( "constrainProportions" ), true );
         //action.putEnumerated(charIDToTypeID("Intr"), charIDToTypeID("Intp"), charIDToTypeID('Blnr'));
         action.putEnumerated( stringIDToTypeID( "interfaceIconFrameDimmed" ), stringIDToTypeID( "interpolationType" ), stringIDToTypeID( "bicubicSharper" ) );
