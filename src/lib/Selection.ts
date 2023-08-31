@@ -65,6 +65,18 @@ export class Selection {
     }
 
     /**
+     * delete saved selection
+     * @param name
+     */
+    public static deleteSavedSelection(name: string): void {
+        const desc1 = new ActionDescriptor();
+        const ref1 = new ActionReference();
+        ref1.putName(stringIDToTypeID( "channel" ), name)
+        desc1.putReference( stringIDToTypeID( "null" ), ref1 );
+        app.executeAction( stringIDToTypeID( "delete" ), desc1, DialogModes.NO );
+    }
+
+    /**
      * create a selection area in PS with current rect
      * @return Selection
      */

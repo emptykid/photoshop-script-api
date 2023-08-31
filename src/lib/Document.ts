@@ -390,6 +390,29 @@ export class Document {
         return this;
     }
 
+
+    /**
+     * export current document to bmp file, current fix to windows platform and 24bit
+     * @param path
+     * @param filename
+     */
+    public exportToBMP(path: string, filename: string): Document {
+        const desc1 = new ActionDescriptor();
+        const desc2 = new ActionDescriptor();
+        desc2.putEnumerated( stringIDToTypeID( "platform" ), stringIDToTypeID( "platform" ), stringIDToTypeID( "windows" ) );
+        desc2.putEnumerated( stringIDToTypeID( "bitDepth" ), stringIDToTypeID( "bitDepth" ), stringIDToTypeID( "bitDepth24" ) );
+        desc2.putBoolean( stringIDToTypeID( "compression" ), false );
+        desc1.putObject( stringIDToTypeID( "as" ), stringIDToTypeID( "bMPFormat" ), desc2 );
+        //@ts-ignore
+        desc1.putPath( charIDToTypeID( "In  " ), new File( path + '/' + filename ) );
+        desc1.putInteger( stringIDToTypeID( "documentID" ), 219 );
+        desc1.putBoolean( stringIDToTypeID( "copy" ), true );
+        desc1.putBoolean( stringIDToTypeID( "lowerCase" ), true );
+        desc1.putEnumerated( stringIDToTypeID( "saveStage" ), stringIDToTypeID( "saveStageType" ), stringIDToTypeID( "saveSucceeded" ) );
+        app.executeAction( stringIDToTypeID( "save" ), desc1, DialogModes.NO );
+        return this;
+    }
+
     /**
      * get current user selection， return null if none
      * @param unit
