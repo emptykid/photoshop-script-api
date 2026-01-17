@@ -244,7 +244,9 @@ if any questions, please post an issue.
 
 Ten years Software Engineer from China, former Senior Engineer of Baidu Inc. Head in web, mobile, media development, in love with design. Have several welcome products for designers in China.
 
-[Design Mirror - The best preview tool](http://www.psmirror.cn)
+[Design Mirror - The best preview tool](https://www.psmirror.cn)
 
-[Cutterman - Assets expoter](http://www.cutterman.cn)
+[Cutterman - Assets expoter](https://www.cutterman.cn)
+
+[PSFlow - Photoshop Timelapse Plugin](https://psflow.io)
 
