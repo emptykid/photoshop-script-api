@@ -243,3 +243,5 @@ text.paint();
 [Design Mirror - 最好用的设计稿实时预览工具](http://www.psmirror.cn)
 
 [Cutterman - 自动化切图工具](http://www.cutterman.cn)
+
+[PSFlow：Photoshop 画布延时录制插件](https://psflow.io?utm_source=github&utm_medium=readme&utm_campaign=photoshop-script-api)
