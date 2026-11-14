@@ -248,5 +248,5 @@ Ten years Software Engineer from China, former Senior Engineer of Baidu Inc. Hea
 
 [Cutterman - Assets expoter](https://www.cutterman.cn)
 
-[PSFlow - Photoshop Timelapse Plugin](https://psflow.io)
+[PSFlow – record a timelapse of your Photoshop canvas](https://psflow.io?utm_source=github&utm_medium=readme&utm_campaign=photoshop-script-api)
 
